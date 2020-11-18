@@ -1,0 +1,18 @@
+{
+  "name": "@platypii/cesium",
+  "version": "0.1.1",
+  "description": "TypeScript definitions for Cesium JS",
+  "keywords": [],
+  "author": "Kenny Daniel <platypii@gmail.com>",
+  "homepage": "https://github.com/platypii/types_cesium",
+  "license": "Apache-2.0",
+  "email": "platypii@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/platypii/types_cesium.git"
+  },
+  "bugs": {
+    "url": "https://github.com/platypii/types_cesium/issues"
+  },
+  "types": "index.d.ts"
+}
