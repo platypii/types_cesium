@@ -5814,8 +5814,9 @@ export class EllipsoidTangentPlane {
      * point of the provided Cartesians.
      * @param cartesians - The list of positions surrounding the center point.
      * @param [ellipsoid = Ellipsoid.WGS84] - The ellipsoid to use.
+     * @returns The new instance of EllipsoidTangentPlane.
      */
-    static fromPoints(cartesians: Cartesian3[], ellipsoid?: Ellipsoid): void;
+    static fromPoints(cartesians: Cartesian3[], ellipsoid?: Ellipsoid): EllipsoidTangentPlane;
     /**
      * Computes the projection of the provided 3D position onto the 2D plane, radially outward from the {@link EllipsoidTangentPlane.ellipsoid} coordinate system origin.
      * @param cartesian - The point to project.
