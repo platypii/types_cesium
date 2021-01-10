@@ -2509,7 +2509,7 @@ export class Cartesian4 {
     toString(): string;
     /**
      * Packs an arbitrary floating point value to 4 values representable using uint8.
-     * @param value - A floating point number
+     * @param value - A floating point number.
      * @param [result] - The Cartesian4 that will contain the packed float.
      * @returns A Cartesian4 representing the float packed to values in x, y, z, and w.
      */
@@ -5014,15 +5014,15 @@ export namespace EasingFunction {
     /**
      * Quadratic in.
      */
-    const QUADRACTIC_IN: EasingFunction.Callback;
+    const QUADRATIC_IN: EasingFunction.Callback;
     /**
      * Quadratic out.
      */
-    const QUADRACTIC_OUT: EasingFunction.Callback;
+    const QUADRATIC_OUT: EasingFunction.Callback;
     /**
      * Quadratic in then out.
      */
-    const QUADRACTIC_IN_OUT: EasingFunction.Callback;
+    const QUADRATIC_IN_OUT: EasingFunction.Callback;
     /**
      * Cubic in.
      */
@@ -5131,6 +5131,18 @@ export namespace EasingFunction {
      * Bounce in then out.
      */
     const BOUNCE_IN_OUT: EasingFunction.Callback;
+    /**
+     * Quadratic in.
+     */
+    const QUADRACTIC_IN: EasingFunction.Callback;
+    /**
+     * Quadratic out.
+     */
+    const QUADRACTIC_OUT: EasingFunction.Callback;
+    /**
+     * Quadratic in then out.
+     */
+    const QUADRACTIC_IN_OUT: EasingFunction.Callback;
     /**
      * Function interface for implementing a custom easing function.
      * @example
@@ -19648,7 +19660,7 @@ export class EllipseGraphics {
      */
     extrudedHeightReference: Property | undefined;
     /**
-     * Gets or sets the numeric property specifying the rotation of the ellipse clockwise from north.
+     * Gets or sets the numeric property specifying the rotation of the ellipse counter-clockwise from north.
      */
     rotation: Property | undefined;
     /**
@@ -32946,6 +32958,11 @@ export class MapboxStyleImageryProvider {
  *  <ul>
  *      <li><code>image</code>: color ramp image to use for color the terrain by aspect.</li>
  *  </ul>
+ *  <li>ElevationBand</li>
+ *  <ul>
+ *      <li><code>heights</code>: image of heights sorted from lowest to highest.</li>
+ *      <li><code>colors</code>: image of colors at the corresponding heights.</li>
+ * </ul>
  * </ul>
  * </ul>
  * </div>
@@ -33140,6 +33157,10 @@ export class Material {
      * Gets the name of the aspect ramp material.
      */
     static readonly AspectRampMaterialType: string;
+    /**
+     * Gets the name of the elevation band material.
+     */
+    static readonly ElevationBandType: string;
 }
 
 /**
@@ -39501,6 +39522,64 @@ export class WebMapTileServiceImageryProvider {
 }
 
 /**
+ * @property height - The height.
+ * @property color - The color at this height.
+ */
+export type createElevationBandMaterialEntry = {
+    height: number;
+    color: Color;
+};
+
+/**
+ * @property entries - A list of elevation entries. They will automatically be sorted from lowest to highest. If there is only one entry and <code>extendsDownards</code> and <code>extendUpwards</code> are both <code>false</code>, they will both be set to <code>true</code>.
+ * @property [extendDownwards = false] - If <code>true</code>, the band's minimum elevation color will extend infinitely downwards.
+ * @property [extendUpwards = false] - If <code>true</code>, the band's maximum elevation color will extend infinitely upwards.
+ */
+export type createElevationBandMaterialBand = {
+    entries: createElevationBandMaterialEntry[];
+    extendDownwards?: boolean;
+    extendUpwards?: boolean;
+};
+
+/**
+ * Creates a {@link Material} that combines multiple layers of color/gradient bands and maps them to terrain heights.
+ *
+ * The shader does a binary search over all the heights to find out which colors are above and below a given height, and
+ * interpolates between them for the final color. This material supports hundreds of entries relatively cheaply.
+ * @example
+ * scene.globe.material = Cesium.createElevationBandMaterial({
+ *     scene : scene,
+ *     layers : [{
+ *         entries : [{
+ *             height : 4200.0,
+ *             color : new Cesium.Color(0.0, 0.0, 0.0, 1.0)
+ *         }, {
+ *             height : 8848.0,
+ *             color : new Cesium.Color(1.0, 1.0, 1.0, 1.0)
+ *         }],
+ *         extendDownwards : true,
+ *         extendUpwards : true,
+ *     }, {
+ *         entries : [{
+ *             height : 7000.0,
+ *             color : new Cesium.Color(1.0, 0.0, 0.0, 0.5)
+ *         }, {
+ *             height : 7100.0,
+ *             color : new Cesium.Color(1.0, 0.0, 0.0, 0.5)
+ *         }]
+ *     }]
+ * });
+ * @param options - Object with the following properties:
+ * @param options.scene - The scene where the visualization is taking place.
+ * @param options.layers - A list of bands ordered from lowest to highest precedence.
+ * @returns A new {@link Material} instance.
+ */
+export function createElevationBandMaterial(options: {
+    scene: Scene;
+    layers: createElevationBandMaterialBand[];
+}): Material;
+
+/**
  * Creates a {@link Cesium3DTileset} instance for the
  * {@link https://cesium.com/content/cesium-osm-buildings/|Cesium OSM Buildings}
  * tileset.
@@ -42635,6 +42714,7 @@ declare module "cesium/Source/Scene/VerticalOrigin" { import { VerticalOrigin } 
 declare module "cesium/Source/Scene/ViewportQuad" { import { ViewportQuad } from 'cesium'; export default ViewportQuad; }
 declare module "cesium/Source/Scene/WebMapServiceImageryProvider" { import { WebMapServiceImageryProvider } from 'cesium'; export default WebMapServiceImageryProvider; }
 declare module "cesium/Source/Scene/WebMapTileServiceImageryProvider" { import { WebMapTileServiceImageryProvider } from 'cesium'; export default WebMapTileServiceImageryProvider; }
+declare module "cesium/Source/Scene/createElevationBandMaterial" { import { createElevationBandMaterial } from 'cesium'; export default createElevationBandMaterial; }
 declare module "cesium/Source/Scene/createOsmBuildings" { import { createOsmBuildings } from 'cesium'; export default createOsmBuildings; }
 declare module "cesium/Source/Scene/createTangentSpaceDebugPrimitive" { import { createTangentSpaceDebugPrimitive } from 'cesium'; export default createTangentSpaceDebugPrimitive; }
 declare module "cesium/Source/Scene/createWorldImagery" { import { createWorldImagery } from 'cesium'; export default createWorldImagery; }
