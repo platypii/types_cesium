@@ -5139,18 +5139,6 @@ export namespace EasingFunction {
      */
     const BOUNCE_IN_OUT: EasingFunction.Callback;
     /**
-     * Quadratic in.
-     */
-    const QUADRACTIC_IN: EasingFunction.Callback;
-    /**
-     * Quadratic out.
-     */
-    const QUADRACTIC_OUT: EasingFunction.Callback;
-    /**
-     * Quadratic in then out.
-     */
-    const QUADRACTIC_IN_OUT: EasingFunction.Callback;
-    /**
      * Function interface for implementing a custom easing function.
      * @example
      * function quadraticIn(time) {
@@ -12519,7 +12507,7 @@ export class PolylineGeometry {
  *   shapePositions : computeCircle(100000.0)
  * });
  * @param options - Object with the following properties:
- * @param options.polylinePositions - An array of {@link Cartesain3} positions that define the center of the polyline volume.
+ * @param options.polylinePositions - An array of {@link Cartesian3} positions that define the center of the polyline volume.
  * @param options.shapePositions - An array of {@link Cartesian2} positions that define the shape to be extruded along the polyline
  * @param [options.ellipsoid = Ellipsoid.WGS84] - The ellipsoid to be used as a reference.
  * @param [options.granularity = Math.RADIANS_PER_DEGREE] - The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
@@ -15321,7 +15309,7 @@ export class Spline {
  *
  * The Worker is not constructed until a task is scheduled.
  * @param workerPath - The Url to the worker. This can either be an absolute path or relative to the Cesium Workers folder.
- * @param [maximumActiveTasks = 5] - The maximum number of active tasks.  Once exceeded,
+ * @param [maximumActiveTasks = Number.POSITIVE_INFINITY] - The maximum number of active tasks.  Once exceeded,
  *                                        scheduleTask will not queue any more tasks, allowing
  *                                        work to be rescheduled in future frames.
  */
@@ -28183,10 +28171,6 @@ export class Cesium3DTileset {
      * completely loaded for this view.
      */
     readonly tilesLoaded: boolean;
-    /**
-     * The url to a tileset JSON file.
-     */
-    readonly url: string;
     /**
      * The resource used to fetch the tileset JSON file
      */

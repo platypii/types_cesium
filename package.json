@@ -1,6 +1,6 @@
 {
   "name": "@platypii/cesium",
-  "version": "1.78.0",
+  "version": "1.79.0",
   "description": "TypeScript definitions for Cesium JS",
   "keywords": ["cesium", "types", "3d", "map", "gis"],
   "author": "Kenny Daniel <platypii@gmail.com>",
