@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.80
+VERSION=1.81
 URL=https://github.com/CesiumGS/cesium/releases/download/$VERSION/Cesium-$VERSION.zip
 
 mkdir -p tmp
