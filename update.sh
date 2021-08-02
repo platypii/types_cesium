@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# TODO: Get version
-# npm show cesium version
+set -e
 
-VERSION=1.83
+VERSION_NPM=$(npm show cesium version)
+VERSION=${VERSION_NPM/.0/}
 URL=https://github.com/CesiumGS/cesium/releases/download/$VERSION/Cesium-$VERSION.zip
+
+echo "Updating to Cesium $VERSION"
 
 mkdir -p tmp
 cd tmp

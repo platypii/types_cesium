@@ -2,7 +2,7 @@
 
 # @types/cesium
 
-Standalone typescript definition file for Cesium JS.
+Standalone typescript definition file for [Cesium JS](https://github.com/CesiumGS/cesium).
 
 ## Why?
 
@@ -16,7 +16,7 @@ Add to `package.json`:
 ```json
 {
   "devDependencies": {
-    "@platypii/cesium": "^1.83.0",
+    "@platypii/cesium": "^1.84.0",
   }
 }
 ```
