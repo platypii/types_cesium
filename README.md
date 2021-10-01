@@ -16,7 +16,7 @@ Add to `package.json`:
 ```json
 {
   "devDependencies": {
-    "@platypii/cesium": "^1.85.0",
+    "@platypii/cesium": "^1.86.0",
   }
 }
 ```
