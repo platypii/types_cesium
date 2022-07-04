@@ -1,4 +1,5 @@
 [![npm](https://img.shields.io/npm/v/@platypii/cesium)](https://www.npmjs.com/package/@platypii/cesium)
+[![apache license](https://img.shields.io/badge/License-Apache-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # @types/cesium
 
@@ -18,7 +19,7 @@ Add to `package.json`:
 ```json
 {
   "devDependencies": {
-    "@platypii/cesium": "^1.94.0",
+    "@platypii/cesium": "^1.95.0",
   }
 }
 ```
