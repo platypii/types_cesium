@@ -16351,6 +16351,28 @@ export class TileProviderError {
      */
     error: Error;
     /**
+     * Reports an error in an {@link ImageryProvider} or {@link TerrainProvider} by raising an event if it has any listeners, or by
+     * logging the error to the console if the event has no listeners.  This method also tracks the number
+     * of times the operation has been retried.
+     * @param previousError - The error instance returned by this function the last
+     *        time it was called for this error, or undefined if this is the first time this error has
+     *        occurred.
+     * @param provider - The imagery or terrain provider that encountered the error.
+     * @param event - The event to raise to inform listeners of the error.
+     * @param message - The message describing the error.
+     * @param x - The X coordinate of the tile that experienced the error, or undefined if the
+     *        error is not specific to a particular tile.
+     * @param y - The Y coordinate of the tile that experienced the error, or undefined if the
+     *        error is not specific to a particular tile.
+     * @param level - The level-of-detail of the tile that experienced the error, or undefined if the
+     *        error is not specific to a particular tile.
+     * @param [errorDetails] - The error or exception that occurred, if any.
+     * @returns The error instance that was passed to the event listeners and that
+     *          should be passed to this function the next time it is called for the same error in order
+     *          to track retry counts.
+     */
+    static reportError(previousError: TileProviderError, provider: ImageryProvider | TerrainProvider, event: Event, message: string, x: number, y: number, level: number, errorDetails?: Error): TileProviderError;
+    /**
      * Handles an error in an {@link ImageryProvider} or {@link TerrainProvider} by raising an event if it has any listeners, or by
      * logging the error to the console if the event has no listeners.  This method also tracks the number
      * of times the operation has been retried and will automatically retry if requested to do so by the
@@ -16375,6 +16397,13 @@ export class TileProviderError {
      *          to track retry counts.
      */
     static handleError(previousError: TileProviderError, provider: ImageryProvider | TerrainProvider, event: Event, message: string, x: number, y: number, level: number, retryFunction: TileProviderError.RetryFunction, errorDetails?: Error): TileProviderError;
+    /**
+     * Reports success of an operation by resetting the retry count of a previous error, if any.  This way,
+     * if the error occurs again in the future, the listeners will be informed that it has not yet been retried.
+     * @param previousError - The previous error, or undefined if this operation has
+     *        not previously resulted in an error.
+     */
+    static reportSuccess(previousError: TileProviderError): void;
     /**
      * Handles success of an operation by resetting the retry count of a previous error, if any.  This way,
      * if the error occurs again in the future, the listeners will be informed that it has not yet been retried.
@@ -28459,7 +28488,9 @@ export class Cesium3DTileStyle {
  * @param [options.lightColor] - The light color when shading models. When <code>undefined</code> the scene's light color is used instead.
  * @param [options.imageBasedLighting] - The properties for managing image-based lighting for this tileset.
  * @param [options.backFaceCulling = true] - Whether to cull back-facing geometry. When true, back face culling is determined by the glTF material's doubleSided property; when false, back face culling is disabled.
+ * @param [options.enableShowOutline = true] - Whether to enable outlines for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. This can be set to false to avoid the additional processing of geometry at load time. When false, the showOutlines and outlineColor options are ignored.
  * @param [options.showOutline = true] - Whether to display the outline for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. When true, outlines are displayed. When false, outlines are not displayed.
+ * @param [options.outlineColor = Color.BLACK] - The color to use when rendering outlines.
  * @param [options.vectorClassificationOnly = false] - Indicates that only the tileset's vector tiles should be used for classification.
  * @param [options.vectorKeepDecodedPositions = false] - Whether vector tiles should keep decoded positions in memory. This is used with {@link Cesium3DTileFeature.getPolylinePositions}.
  * @param [options.featureIdLabel = "featureId_0"] - Label of the feature ID set to use for picking and styling. For EXT_mesh_features, this is the feature ID's label property, or "featureId_N" (where N is the index in the featureIds array) when not specified. EXT_feature_metadata did not have a label field, so such feature ID sets are always labeled "featureId_N" where N is the index in the list of all feature Ids, where feature ID attributes are listed before feature ID textures. If featureIdLabel is an integer N, it is converted to the string "featureId_N" automatically. If both per-primitive and per-instance feature IDs are present, the instance feature IDs take priority.
@@ -28519,7 +28550,9 @@ export class Cesium3DTileset {
         lightColor?: Cartesian3;
         imageBasedLighting?: ImageBasedLighting;
         backFaceCulling?: boolean;
+        enableShowOutline?: boolean;
         showOutline?: boolean;
+        outlineColor?: Color;
         vectorClassificationOnly?: boolean;
         vectorKeepDecodedPositions?: boolean;
         featureIdLabel?: string | number;
@@ -28843,8 +28876,18 @@ export class Cesium3DTileset {
      * Whether to display the outline for models using the
      * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension.
      * When true, outlines are displayed. When false, outlines are not displayed.
+     * <p>
+     * When enableModelExperimental is set to true, this property can be toggled
+     * at runtime. However, when enableModelExperimental is false, this property
+     * is readonly (it can only be set in the constructor).
+     * </p>
      */
-    readonly showOutline: boolean;
+    showOutline: boolean;
+    /**
+     * The color to use when rendering outlines. This option is only used
+     * when enableModelExperimental is set to true.
+     */
+    outlineColor: Color;
     /**
      * The {@link SplitDirection} to apply to this tileset.
      */
@@ -34700,7 +34743,7 @@ export namespace MaterialAppearance {
  * @param [options.silhouetteColor = Color.RED] - The silhouette color. If more than 256 models have silhouettes enabled, there is a small chance that overlapping models will have minor artifacts.
  * @param [options.silhouetteSize = 0.0] - The size of the silhouette in pixels.
  * @param [options.clippingPlanes] - The {@link ClippingPlaneCollection} used to selectively disable rendering the model.
- * @param [options.dequantizeInShader = true] - Determines if a {@link https://github.com/google/draco|Draco} encoded model is dequantized on the GPU. This decreases total memory usage for encoded models. Deprecated in CesiumJS 1.94, will be removed in CesiumJS 1.96.
+ * @param [options.dequantizeInShader = true] - Determines if a {@link https://github.com/google/draco|Draco} encoded model is dequantized on the GPU. This decreases total memory usage for encoded models. Deprecated in CesiumJS 1.94, will be removed in CesiumJS 1.97.
  * @param [options.lightColor] - The light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
  * @param [options.imageBasedLighting] - The properties for managing image-based lighting on this model.
  * @param [options.credit] - A credit for the data source, which is displayed on the canvas.
@@ -35038,7 +35081,7 @@ export class Model {
      * @param [options.silhouetteColor = Color.RED] - The silhouette color. If more than 256 models have silhouettes enabled, there is a small chance that overlapping models will have minor artifacts.
      * @param [options.silhouetteSize = 0.0] - The size of the silhouette in pixels.
      * @param [options.clippingPlanes] - The {@link ClippingPlaneCollection} used to selectively disable rendering the model.
-     * @param [options.dequantizeInShader = true] - Determines if a {@link https://github.com/google/draco|Draco} encoded model is dequantized on the GPU. This decreases total memory usage for encoded models. Deprecated in CesiumJS 1.94, will be removed in CesiumJS 1.96.
+     * @param [options.dequantizeInShader = true] - Determines if a {@link https://github.com/google/draco|Draco} encoded model is dequantized on the GPU. This decreases total memory usage for encoded models. Deprecated in CesiumJS 1.94, will be removed in CesiumJS 1.97.
      * @param [options.lightColor] - The light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
      * @param [options.imageBasedLighting] - The properties for managing image-based lighting for this tileset.
      * @param [options.credit] - A credit for the model, which is displayed on the canvas.
@@ -35665,6 +35708,9 @@ export enum LightingModel {
  * @param [options.colorBlendAmount = 0.5] - Value used to determine the color strength when the <code>colorBlendMode</code> is <code>MIX</code>. A value of 0.0 results in the model's rendered color while a value of 1.0 results in a solid color, with any value in-between resulting in a mix of the two.
  * @param [options.silhouetteColor = Color.RED] - The silhouette color. If more than 256 models have silhouettes enabled, there is a small chance that overlapping models will have minor artifacts.
  * @param [options.silhouetteSize = 0.0] - The size of the silhouette in pixels.
+ * @param [options.enableShowOutline = true] - Whether to enable outlines for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. This can be set to false to avoid the additional processing of geometry at load time. When false, the showOutlines and outlineColor options are ignored.
+ * @param [options.showOutline = true] - Whether to display the outline for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. When true, outlines are displayed. When false, outlines are not displayed.
+ * @param [options.outlineColor = Color.BLACK] - The color to use when rendering outlines.
  * @param [options.clippingPlanes] - The {@link ClippingPlaneCollection} used to selectively disable rendering the model.
  * @param [options.lightColor] - The light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
  * @param [options.imageBasedLighting] - The properties for managing image-based lighting on this model.
@@ -35704,6 +35750,9 @@ export class ModelExperimental {
         colorBlendAmount?: number;
         silhouetteColor?: Color;
         silhouetteSize?: number;
+        enableShowOutline?: boolean;
+        showOutline?: boolean;
+        outlineColor?: Color;
         clippingPlanes?: ClippingPlaneCollection;
         lightColor?: Cartesian3;
         imageBasedLighting?: ImageBasedLighting;
@@ -35898,6 +35947,17 @@ export class ModelExperimental {
      */
     splitDirection: SplitDirection;
     /**
+     * Returns the node with the given <code>name</code> in the glTF. This is used to
+     * modify a node's transform for user-defined animation.
+     * @example
+     * // Apply non-uniform scale to node "Hand"
+     * const node = model.getNode("Hand");
+     * node.matrix = Cesium.Matrix4.fromScale(new Cesium.Cartesian3(5.0, 1.0, 1.0), node.matrix);
+     * @param name - The name of the node in the glTF.
+     * @returns The node, or <code>undefined</code> if no node with the <code>name</code> exists.
+     */
+    getNode(name: string): ModelExperimentalNode;
+    /**
      * Sets the current value of an articulation stage.  After setting one or
      * multiple stage values, call ModelExperimental.applyArticulations() to
      * cause the node matrices to be recalculated.
@@ -35981,6 +36041,9 @@ export class ModelExperimental {
      * @param [options.colorBlendAmount = 0.5] - Value used to determine the color strength when the <code>colorBlendMode</code> is <code>MIX</code>. A value of 0.0 results in the model's rendered color while a value of 1.0 results in a solid color, with any value in-between resulting in a mix of the two.
      * @param [options.silhouetteColor = Color.RED] - The silhouette color. If more than 256 models have silhouettes enabled, there is a small chance that overlapping models will have minor artifacts.
      * @param [options.silhouetteSize = 0.0] - The size of the silhouette in pixels.
+     * @param [options.enableShowOutline = true] - Whether to enable outlines for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. This can be set false to avoid post-processing geometry at load time. When false, the showOutlines and outlineColor options are ignored.
+     * @param [options.showOutline = true] - Whether to display the outline for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. When true, outlines are displayed. When false, outlines are not displayed.
+     * @param [options.outlineColor = Color.BLACK] - The color to use when rendering outlines.
      * @param [options.clippingPlanes] - The {@link ClippingPlaneCollection} used to selectively disable rendering the model.
      * @param [options.lightColor] - The light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
      * @param [options.imageBasedLighting] - The properties for managing image-based lighting on this model.
@@ -36026,6 +36089,9 @@ export class ModelExperimental {
         colorBlendAmount?: number;
         silhouetteColor?: Color;
         silhouetteSize?: number;
+        enableShowOutline?: boolean;
+        showOutline?: boolean;
+        outlineColor?: Color;
         clippingPlanes?: ClippingPlaneCollection;
         lightColor?: Cartesian3;
         imageBasedLighting?: ImageBasedLighting;
@@ -36050,6 +36116,18 @@ export class ModelExperimental {
  * m.modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(origin);
  */
 export var modelMatrix: Matrix4;
+
+/**
+ * Whether to display the outline for models using the
+ * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension.
+ * When true, outlines are displayed. When false, outlines are not displayed.
+ */
+export var showOutline: boolean;
+
+/**
+ * The color to use when rendering outlines.
+ */
+export var outlineColor: Color;
 
 /**
  * An active animation derived from a glTF asset. An active animation is an
@@ -36353,9 +36431,49 @@ export class ModelExperimentalAnimationCollection {
 }
 
 /**
- * The indices of the children of this node in the scene graph.
+ * A model node with a modifiable transform to allow users to define their
+ * own animations. While a model's asset can contain animations that target
+ * a node's transform, this class allows users to change a node's transform
+ * externally. In this way, animation can be driven by another source, not
+ * just by the model's asset.
+ * <p>
+ * Use {@link ModelExperimental#getNode} to get an instance from a loaded model.
+ * </p>
+ * @example
+ * const node = model.getNode("Hand");
+ * node.matrix = Cesium.Matrix4.fromScale(new Cesium.Cartesian3(5.0, 1.0, 1.0), node.matrix);
  */
-export const children: number[];
+export class ModelExperimentalNode {
+    /**
+     * The value of the <code>name</code> property of this node.
+     */
+    readonly name: string;
+    /**
+     * The index of the node in the glTF.
+     */
+    readonly id: number;
+    /**
+     * Determines if this node and its children will be shown.
+     */
+    show: boolean;
+    /**
+     * The node's 4x4 matrix transform from its local coordinates to
+     * its parent's. Setting the matrix to undefined will restore the
+     * node's original transform, and allow the node to be animated by
+     * any animations in the model again.
+     * <p>
+     * For changes to take effect, this property must be assigned to;
+     * setting individual elements of the matrix will not work.
+     * </p>
+     */
+    matrix: Matrix4;
+    /**
+     * Gets the node's original 4x4 matrix transform from its local
+     * coordinates to its parent's, without any node transformations
+     * or articulations applied.
+     */
+    originalMatrix: Matrix4;
+}
 
 /**
  * A feature of a {@link ModelExperimental}.
@@ -42162,12 +42280,14 @@ export function createElevationBandMaterial(options: {
  *        specified, a default style is used which gives each building or building part a
  *        color inferred from its OpenStreetMap <code>tags</code>. If no color can be inferred,
  *        <code>options.defaultColor</code> is used.
+ * @param [options.enableShowOutline = true] - If true, enable rendering outlines. This can be set to false to avoid the additional processing of geometry at load time.
  * @param [options.showOutline = true] - Whether to show outlines around buildings. When true,
  *        outlines are displayed. When false, outlines are not displayed.
  */
 export function createOsmBuildings(options?: {
     defaultColor?: Color;
     style?: Cesium3DTileStyle;
+    enableShowOutline?: boolean;
     showOutline?: boolean;
 }): Cesium3DTileset;
 
@@ -42247,9 +42367,9 @@ export function createWorldImagery(options?: {
  *
  * function tick() {
  *     clock.tick();
- *     Cesium.requestAnimationFrame(tick);
+ *     requestAnimationFrame(tick);
  * }
- * Cesium.requestAnimationFrame(tick);
+ * requestAnimationFrame(tick);
  * @param container - The DOM element or ID that will contain the widget.
  * @param viewModel - The view model used by this widget.
  */
@@ -43211,6 +43331,7 @@ export class CesiumInspectorViewModel {
  * @param [options.shadows = false] - Determines if shadows are cast by light sources.
  * @param [options.terrainShadows = ShadowMode.RECEIVE_ONLY] - Determines if the terrain casts or receives shadows from light sources.
  * @param [options.mapMode2D = MapMode2D.INFINITE_SCROLL] - Determines if the 2D map is rotatable or can be scrolled infinitely in the horizontal direction.
+ * @param [options.blurActiveElementOnCanvasFocus = true] - If true, the active element will blur when the viewer's canvas is clicked. Setting this to false is useful for cases when the canvas is clicked only for retrieving position or an entity data without actually meaning to set the canvas to be the active element.
  * @param [options.requestRenderMode = false] - If true, rendering a frame will only occur when needed as determined by changes within the scene. Enabling improves performance of the application, but requires using {@link Scene#requestRender} to render a new frame explicitly in this mode. This will be necessary in many cases after making changes to the scene in other parts of the API. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
  * @param [options.maximumRenderTimeChange = 0.0] - If requestRenderMode is true, this value defines the maximum change in simulation time allowed before a render is requested. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
  * @param [options.msaaSamples = 1] - If provided, this value controls the rate of multisample antialiasing. Typical multisampling rates are 2, 4, and sometimes 8 samples per pixel. Higher sampling rates of MSAA may impact performance in exchange for improved visual quality. This value only applies to WebGL2 contexts that support multisample render targets.
@@ -43237,6 +43358,7 @@ export class CesiumWidget {
         shadows?: boolean;
         terrainShadows?: ShadowMode;
         mapMode2D?: MapMode2D;
+        blurActiveElementOnCanvasFocus?: boolean;
         requestRenderMode?: boolean;
         maximumRenderTimeChange?: number;
         msaaSamples?: number;
@@ -43283,14 +43405,14 @@ export class CesiumWidget {
     readonly screenSpaceEventHandler: ScreenSpaceEventHandler;
     /**
      * Gets or sets the target frame rate of the widget when <code>useDefaultRenderLoop</code>
-     * is true. If undefined, the browser's {@link requestAnimationFrame} implementation
+     * is true. If undefined, the browser's requestAnimationFrame implementation
      * determines the frame rate.  If defined, this value must be greater than 0.  A value higher
      * than the underlying requestAnimationFrame implementation will have no effect.
      */
     targetFrameRate: number;
     /**
      * Gets or sets whether or not this widget should control the render loop.
-     * If set to true the widget will use {@link requestAnimationFrame} to
+     * If true the widget will use requestAnimationFrame to
      * perform rendering and resizing of the widget, as well as drive the
      * simulation clock. If set to false, you must manually call the
      * <code>resize</code>, <code>render</code> methods as part of a custom
@@ -44396,6 +44518,7 @@ export namespace Viewer {
      * @property [terrainShadows = ShadowMode.RECEIVE_ONLY] - Determines if the terrain casts or receives shadows from light sources.
      * @property [mapMode2D = MapMode2D.INFINITE_SCROLL] - Determines if the 2D map is rotatable or can be scrolled infinitely in the horizontal direction.
      * @property [projectionPicker = false] - If set to true, the ProjectionPicker widget will be created.
+     * @property [blurActiveElementOnCanvasFocus = true] - If true, the active element will blur when the viewer's canvas is clicked. Setting this to false is useful for cases when the canvas is clicked only for retrieving position or an entity data without actually meaning to set the canvas to be the active element.
      * @property [requestRenderMode = false] - If true, rendering a frame will only occur when needed as determined by changes within the scene. Enabling reduces the CPU/GPU usage of your application and uses less battery on mobile, but requires using {@link Scene#requestRender} to render a new frame explicitly in this mode. This will be necessary in many cases after making changes to the scene in other parts of the API. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
      * @property [maximumRenderTimeChange = 0.0] - If requestRenderMode is true, this value defines the maximum change in simulation time allowed before a render is requested. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
      * @property [depthPlaneEllipsoidOffset = 0.0] - Adjust the DepthPlane to address rendering artefacts below ellipsoid zero elevation.
@@ -44443,6 +44566,7 @@ export namespace Viewer {
         terrainShadows?: ShadowMode;
         mapMode2D?: MapMode2D;
         projectionPicker?: boolean;
+        blurActiveElementOnCanvasFocus?: boolean;
         requestRenderMode?: boolean;
         maximumRenderTimeChange?: number;
         depthPlaneEllipsoidOffset?: number;
@@ -44623,14 +44747,14 @@ export class Viewer {
     readonly screenSpaceEventHandler: ScreenSpaceEventHandler;
     /**
      * Gets or sets the target frame rate of the widget when <code>useDefaultRenderLoop</code>
-     * is true. If undefined, the browser's {@link requestAnimationFrame} implementation
+     * is true. If undefined, the browser's requestAnimationFrame implementation
      * determines the frame rate.  If defined, this value must be greater than 0.  A value higher
      * than the underlying requestAnimationFrame implementation will have no effect.
      */
     targetFrameRate: number;
     /**
      * Gets or sets whether or not this widget should control the render loop.
-     * If set to true the widget will use {@link requestAnimationFrame} to
+     * If true the widget will use requestAnimationFrame to
      * perform rendering and resizing of the widget, as well as drive the
      * simulation clock. If set to false, you must manually call the
      * <code>resize</code>, <code>render</code> methods
@@ -45244,6 +45368,7 @@ declare module "cesium/Source/Scene/ModelExperimental/CustomShader" { import { C
 declare module "cesium/Source/Scene/ModelExperimental/ModelExperimental" { import { ModelExperimental } from 'cesium'; export default ModelExperimental; }
 declare module "cesium/Source/Scene/ModelExperimental/ModelExperimentalAnimation" { import { ModelExperimentalAnimation } from 'cesium'; export default ModelExperimentalAnimation; }
 declare module "cesium/Source/Scene/ModelExperimental/ModelExperimentalAnimationCollection" { import { ModelExperimentalAnimationCollection } from 'cesium'; export default ModelExperimentalAnimationCollection; }
+declare module "cesium/Source/Scene/ModelExperimental/ModelExperimentalNode" { import { ModelExperimentalNode } from 'cesium'; export default ModelExperimentalNode; }
 declare module "cesium/Source/Scene/ModelExperimental/ModelFeature" { import { ModelFeature } from 'cesium'; export default ModelFeature; }
 declare module "cesium/Source/Scene/ModelExperimental/TextureUniform" { import { TextureUniform } from 'cesium'; export default TextureUniform; }
 declare module "cesium/Source/Widgets/Animation/Animation" { import { Animation } from 'cesium'; export default Animation; }
