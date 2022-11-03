@@ -6299,28 +6299,6 @@ export namespace EventHelper {
 }
 
 /**
- * Flags to enable experimental features in CesiumJS. Stability and performance
- * may not be optimal when these are enabled. Experimental features are subject
- * to change without Cesium's standard deprecation policy.
- * <p>
- * Experimental features must still uphold Cesium's quality standards. Here
- * are some guidelines:
- * </p>
- * <ul>
- *   <li>Experimental features must have high unit test coverage like any other feature.</li>
- *   <li>Experimental features are intended for large features where there is benefit of merging some of the code sooner (e.g. to avoid long-running staging branches)</li>
- *   <li>Experimental flags should be short-lived. Make it clear in the PR what it would take to promote the feature to a regular feature.</li>
- *   <li>To avoid cluttering the code, check the flag in as few places as possible. Ideally this would be a single place.</li>
- * </ul>
- */
-export namespace ExperimentalFeatures {
-    /**
-     * Toggles the usage of the ModelExperimental class.
-     */
-    var enableModelExperimental: boolean;
-}
-
-/**
  * Constants to determine how an interpolated value is extrapolated
  * when querying outside the bounds of available data.
  */
@@ -10813,14 +10791,14 @@ export class Matrix4 implements ArrayLike<number> {
      * @param rotation - The rotation matrix.
      * @returns The modified result parameter.
      */
-    static setRotation(matrix: Matrix4, rotation: Matrix4): Matrix4;
+    static setRotation(matrix: Matrix4, rotation: Matrix3): Matrix4;
     /**
      * Extracts the rotation matrix assuming the matrix is an affine transformation.
      * @param matrix - The matrix.
      * @param result - The object onto which to store the result.
      * @returns The modified result parameter.
      */
-    static getRotation(matrix: Matrix4, result: Matrix4): Matrix4;
+    static getRotation(matrix: Matrix4, result: Matrix3): Matrix3;
     /**
      * Computes the product of two matrices.
      * @param left - The first matrix.
@@ -16373,44 +16351,12 @@ export class TileProviderError {
      */
     static reportError(previousError: TileProviderError, provider: ImageryProvider | TerrainProvider, event: Event, message: string, x: number, y: number, level: number, errorDetails?: Error): TileProviderError;
     /**
-     * Handles an error in an {@link ImageryProvider} or {@link TerrainProvider} by raising an event if it has any listeners, or by
-     * logging the error to the console if the event has no listeners.  This method also tracks the number
-     * of times the operation has been retried and will automatically retry if requested to do so by the
-     * event listeners.
-     * @param previousError - The error instance returned by this function the last
-     *        time it was called for this error, or undefined if this is the first time this error has
-     *        occurred.
-     * @param provider - The imagery or terrain provider that encountered the error.
-     * @param event - The event to raise to inform listeners of the error.
-     * @param message - The message describing the error.
-     * @param x - The X coordinate of the tile that experienced the error, or undefined if the
-     *        error is not specific to a particular tile.
-     * @param y - The Y coordinate of the tile that experienced the error, or undefined if the
-     *        error is not specific to a particular tile.
-     * @param level - The level-of-detail of the tile that experienced the error, or undefined if the
-     *        error is not specific to a particular tile.
-     * @param retryFunction - The function to call to retry the operation.  If undefined, the
-     *        operation will not be retried.
-     * @param [errorDetails] - The error or exception that occurred, if any.
-     * @returns The error instance that was passed to the event listeners and that
-     *          should be passed to this function the next time it is called for the same error in order
-     *          to track retry counts.
-     */
-    static handleError(previousError: TileProviderError, provider: ImageryProvider | TerrainProvider, event: Event, message: string, x: number, y: number, level: number, retryFunction: TileProviderError.RetryFunction, errorDetails?: Error): TileProviderError;
-    /**
      * Reports success of an operation by resetting the retry count of a previous error, if any.  This way,
      * if the error occurs again in the future, the listeners will be informed that it has not yet been retried.
      * @param previousError - The previous error, or undefined if this operation has
      *        not previously resulted in an error.
      */
     static reportSuccess(previousError: TileProviderError): void;
-    /**
-     * Handles success of an operation by resetting the retry count of a previous error, if any.  This way,
-     * if the error occurs again in the future, the listeners will be informed that it has not yet been retried.
-     * @param previousError - The previous error, or undefined if this operation has
-     *        not previously resulted in an error.
-     */
-    static handleSuccess(previousError: TileProviderError): void;
 }
 
 export namespace TileProviderError {
@@ -22260,6 +22206,7 @@ export namespace ModelGraphics {
      * @property [nodeTransformations] - An object, where keys are names of nodes, and values are {@link TranslationRotationScale} Properties describing the transformation to apply to that node. The transformation is applied after the node's existing transformation as specified in the glTF, and does not replace the node's existing transformation.
      * @property [articulations] - An object, where keys are composed of an articulation name, a single space, and a stage name, and the values are numeric properties.
      * @property [clippingPlanes] - A property specifying the {@link ClippingPlaneCollection} used to selectively disable rendering the model.
+     * @property [customShader] - A property specifying the {@link CustomShader} to apply to this model.
      */
     type ConstructorOptions = {
         show?: Property | boolean;
@@ -22287,6 +22234,7 @@ export namespace ModelGraphics {
             [key: string]: number;
         };
         clippingPlanes?: Property | ClippingPlaneCollection;
+        customShader?: Property | CustomShader;
     };
 }
 
@@ -22403,6 +22351,10 @@ export class ModelGraphics {
      * A property specifying the {@link ClippingPlaneCollection} used to selectively disable rendering the model.
      */
     clippingPlanes: Property | undefined;
+    /**
+     * Gets or sets the {@link CustomShader} to apply to this model. When <code>undefined</code>, no custom shader code is used.
+     */
+    customShader: Property | undefined;
     /**
      * Duplicates this instance.
      * @param [result] - The object onto which to store the result.
@@ -27767,15 +27719,6 @@ export class Cesium3DTileStyle {
      */
     readonly style: any;
     /**
-     * When <code>true</code>, the style is ready and its expressions can be evaluated.  When
-     * a style is constructed with an object, as opposed to a url, this is <code>true</code> immediately.
-     */
-    readonly ready: boolean;
-    /**
-     * Gets the promise that will be resolved when the the style is ready and its expressions can be evaluated.
-     */
-    readonly readyPromise: Promise<Cesium3DTileStyle>;
-    /**
      * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>show</code> property. Alternatively a boolean, string, or object defining a show style can be used.
      * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
      * <p>
@@ -28501,7 +28444,7 @@ export class Cesium3DTileStyle {
  * @param [options.debugHeatmapTilePropertyName] - The tile variable to colorize as a heatmap. All rendered tiles will be colorized relative to each other's specified variable value.
  * @param [options.debugFreezeFrame = false] - For debugging only. Determines if only the tiles from last frame should be used for rendering.
  * @param [options.debugColorizeTiles = false] - For debugging only. When true, assigns a random color to each tile.
- * @param [options.enableDebugWireframe] - For debugging only. This must be true for debugWireframe to work for ModelExperimental in WebGL1. This cannot be set after the tileset has loaded.
+ * @param [options.enableDebugWireframe] - For debugging only. This must be true for debugWireframe to work in WebGL1. This cannot be set after the tileset has loaded.
  * @param [options.debugWireframe = false] - For debugging only. When true, render's each tile's content as a wireframe.
  * @param [options.debugShowBoundingVolume = false] - For debugging only. When true, renders the bounding volume for each tile.
  * @param [options.debugShowContentBoundingVolume = false] - For debugging only. When true, renders the bounding volume for each tile's content.
@@ -28790,8 +28733,8 @@ export class Cesium3DTileset {
      * </p>
      * @example
      * tileset.tileVisible.addEventListener(function(tile) {
-     *     if (tile.content instanceof Cesium.Batched3DModel3DTileContent) {
-     *         console.log('A Batched 3D Model tile is visible.');
+     *     if (tile.content instanceof Cesium.Model3DTileContent) {
+     *         console.log('A 3D model tile is visible.');
      *     }
      * });
      * @example
@@ -28876,16 +28819,10 @@ export class Cesium3DTileset {
      * Whether to display the outline for models using the
      * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension.
      * When true, outlines are displayed. When false, outlines are not displayed.
-     * <p>
-     * When enableModelExperimental is set to true, this property can be toggled
-     * at runtime. However, when enableModelExperimental is false, this property
-     * is readonly (it can only be set in the constructor).
-     * </p>
      */
     showOutline: boolean;
     /**
-     * The color to use when rendering outlines. This option is only used
-     * when enableModelExperimental is set to true.
+     * The color to use when rendering outlines.
      */
     outlineColor: Color;
     /**
@@ -29074,11 +29011,8 @@ export class Cesium3DTileset {
     style: Cesium3DTileStyle | undefined;
     /**
      * A custom shader to apply to all tiles in the tileset. Only used for
-     * contents that use {@link ModelExperimental}. Using custom shaders with a
+     * contents that use {@link Model}. Using custom shaders with a
      * {@link Cesium3DTileStyle} may lead to undefined behavior.
-     * <p>
-     * To enable {@link ModelExperimental}, set {@link ExperimentalFeatures.enableModelExperimental} or tileset.enableModelExperimental to <code>true</code>.
-     * </p>
      */
     customShader: CustomShader | undefined;
     /**
@@ -29159,22 +29093,28 @@ export class Cesium3DTileset {
      */
     readonly totalMemoryUsageInBytes: number;
     /**
-     * Determines whether terrain, 3D Tiles or both will be classified by this tileset.
+     * Determines whether terrain, 3D Tiles, or both will be classified by this tileset.
      * <p>
-     * This option is only applied to tilesets containing batched 3D models, geometry data, or vector data. Even when undefined, vector data and geometry data
-     * must render as classifications and will default to rendering on both terrain and other 3D Tiles tilesets.
+     * This option is only applied to tilesets containing batched 3D models,
+     * glTF content, geometry data, or vector data. Even when undefined, vector
+     * and geometry data must render as classifications and will default to
+     * rendering on both terrain and other 3D Tiles tilesets.
      * </p>
      * <p>
-     * When enabled for batched 3D model tilesets, there are a few requirements/limitations on the glTF:
+     * When enabled for batched 3D model and glTF tilesets, there are a few
+     * requirements/limitations on the glTF:
      * <ul>
-     *     <li>POSITION and _BATCHID semantics are required.</li>
-     *     <li>All indices with the same batch id must occupy contiguous sections of the index buffer.</li>
-     *     <li>All shaders and techniques are ignored. The generated shader simply multiplies the position by the model-view-projection matrix.</li>
-     *     <li>The only supported extensions are CESIUM_RTC and WEB3D_quantized_attributes.</li>
-     *     <li>Only one node is supported.</li>
-     *     <li>Only one mesh per node is supported.</li>
-     *     <li>Only one primitive per mesh is supported.</li>
+     *     <li>The glTF cannot contain morph targets, skins, or animations.</li>
+     *     <li>The glTF cannot contain the <code>EXT_mesh_gpu_instancing</code> extension.</li>
+     *     <li>Only meshes with TRIANGLES can be used to classify other assets.</li>
+     *     <li>The <code>POSITION</code> semantic is required.</li>
+     *     <li>If <code>_BATCHID</code>s and an index buffer are both present, all indices with the same batch id must occupy contiguous sections of the index buffer.</li>
+     *     <li>If <code>_BATCHID</code>s are present with no index buffer, all positions with the same batch id must occupy contiguous sections of the position buffer.</li>
      * </ul>
+     * </p>
+     * <p>
+     * Additionally, classification is not supported for points or instanced 3D
+     * models.
      * </p>
      */
     readonly classificationType: ClassificationType;
@@ -31253,6 +31193,14 @@ export class GlobeTranslucency {
      */
     rectangle: Rectangle;
 }
+
+/**
+ * Removes an extension from gltf.extensions, gltf.extensionsUsed, gltf.extensionsRequired, and any other objects in the glTF if it is present.
+ * @param gltf - A javascript object containing a glTF asset.
+ * @param extension - The extension to remove.
+ * @returns The extension data removed from gltf.extensions.
+ */
+export function removeExtension(gltf: any, extension: string): any;
 
 export namespace GoogleEarthEnterpriseImageryProvider {
     /**
@@ -34667,843 +34615,6 @@ export namespace MaterialAppearance {
 }
 
 /**
- * A 3D model based on glTF, the runtime asset format for WebGL, OpenGL ES, and OpenGL.
- * <p>
- * Cesium includes support for geometry and materials, glTF animations, and glTF skinning.
- * In addition, individual glTF nodes are pickable with {@link Scene#pick} and animatable
- * with {@link Model#getNode}.  glTF cameras and lights are not currently supported.
- * </p>
- * <p>
- * An external glTF asset is created with {@link Model.fromGltf}.  glTF JSON can also be
- * created at runtime and passed to this constructor function.  In either case, the
- * {@link Model#readyPromise} is resolved when the model is ready to render, i.e.,
- * when the external binary, image, and shader files are downloaded and the WebGL
- * resources are created.
- * </p>
- * <p>
- * Cesium supports glTF assets with the following extensions:
- * <ul>
- * <li>
- * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Khronos/KHR_binary_glTF/README.md|KHR_binary_glTF (glTF 1.0)}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Khronos/KHR_materials_common/README.md|KHR_materials_common (glTF 1.0)}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Vendor/WEB3D_quantized_attributes/README.md|WEB3D_quantized_attributes (glTF 1.0)}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/AGI_articulations/README.md|AGI_articulations}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/pull/1302|KHR_blend (draft)}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md|KHR_draco_mesh_compression}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/README.md|KHR_materials_pbrSpecularGlossiness}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit/README.md|KHR_materials_unlit}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_techniques_webgl/README.md|KHR_techniques_webgl}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_transform/README.md|KHR_texture_transform}
- * </li><li>
- * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu|KHR_texture_basisu}
- * </li>
- * </ul>
- * </p>
- * <p>
- * Note: for models with compressed textures using the KHR_texture_basisu extension, we recommend power of 2 textures in both dimensions
- * for maximum compatibility. This is because some samplers require power of 2 textures ({@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL|Using textures in WebGL})
- * and KHR_texture_basisu requires multiple of 4 dimensions ({@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu/README.md#additional-requirements|KHR_texture_basisu additional requirements}).
- * </p>
- * <p>
- * For high-precision rendering, Cesium supports the {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Vendor/CESIUM_RTC/README.md|CESIUM_RTC} extension, which introduces the
- * CESIUM_RTC_MODELVIEW parameter semantic that says the node is in WGS84 coordinates translated
- * relative to a local origin.
- * </p>
- * @param [options] - Object with the following properties:
- * @param [options.gltf] - A glTF JSON object, or a binary glTF buffer.
- * @param [options.basePath = ''] - The base path that paths in the glTF JSON are relative to.
- * @param [options.show = true] - Determines if the model primitive will be shown.
- * @param [options.modelMatrix = Matrix4.IDENTITY] - The 4x4 transformation matrix that transforms the model from model to world coordinates.
- * @param [options.scale = 1.0] - A uniform scale applied to this model.
- * @param [options.minimumPixelSize = 0.0] - The approximate minimum pixel size of the model regardless of zoom.
- * @param [options.maximumScale] - The maximum scale size of a model. An upper limit for minimumPixelSize.
- * @param [options.id] - A user-defined object to return when the model is picked with {@link Scene#pick}.
- * @param [options.allowPicking = true] - When <code>true</code>, each glTF mesh and primitive is pickable with {@link Scene#pick}.
- * @param [options.incrementallyLoadTextures = true] - Determine if textures may continue to stream in after the model is loaded.
- * @param [options.asynchronous = true] - Determines if model WebGL resource creation will be spread out over several frames or block until completion once all glTF files are loaded.
- * @param [options.clampAnimations = true] - Determines if the model's animations should hold a pose over frames where no keyframes are specified.
- * @param [options.shadows = ShadowMode.ENABLED] - Determines whether the model casts or receives shadows from light sources.
- * @param [options.debugShowBoundingVolume = false] - For debugging only. Draws the bounding sphere for each draw command in the model.
- * @param [options.debugWireframe = false] - For debugging only. Draws the model in wireframe.
- * @param [options.heightReference = HeightReference.NONE] - Determines how the model is drawn relative to terrain.
- * @param [options.scene] - Must be passed in for models that use the height reference property.
- * @param [options.distanceDisplayCondition] - The condition specifying at what distance from the camera that this model will be displayed.
- * @param [options.color = Color.WHITE] - A color that blends with the model's rendered color.
- * @param [options.colorBlendMode = ColorBlendMode.HIGHLIGHT] - Defines how the color blends with the model.
- * @param [options.colorBlendAmount = 0.5] - Value used to determine the color strength when the <code>colorBlendMode</code> is <code>MIX</code>. A value of 0.0 results in the model's rendered color while a value of 1.0 results in a solid color, with any value in-between resulting in a mix of the two.
- * @param [options.silhouetteColor = Color.RED] - The silhouette color. If more than 256 models have silhouettes enabled, there is a small chance that overlapping models will have minor artifacts.
- * @param [options.silhouetteSize = 0.0] - The size of the silhouette in pixels.
- * @param [options.clippingPlanes] - The {@link ClippingPlaneCollection} used to selectively disable rendering the model.
- * @param [options.dequantizeInShader = true] - Determines if a {@link https://github.com/google/draco|Draco} encoded model is dequantized on the GPU. This decreases total memory usage for encoded models. Deprecated in CesiumJS 1.94, will be removed in CesiumJS 1.97.
- * @param [options.lightColor] - The light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
- * @param [options.imageBasedLighting] - The properties for managing image-based lighting on this model.
- * @param [options.credit] - A credit for the data source, which is displayed on the canvas.
- * @param [options.showCreditsOnScreen = false] - Whether to display the credits of this model on screen.
- * @param [options.backFaceCulling = true] - Whether to cull back-facing geometry. When true, back face culling is determined by the material's doubleSided property; when false, back face culling is disabled. Back faces are not culled if {@link Model#color} is translucent or {@link Model#silhouetteSize} is greater than 0.0.
- * @param [options.showOutline = true] - Whether to display the outline for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. When true, outlines are displayed. When false, outlines are not displayed.
- * @param [options.splitDirection = SplitDirection.NONE] - The {@link SplitDirection} split to apply to this model.
- */
-export class Model {
-    constructor(options?: {
-        gltf?: any | ArrayBuffer | Uint8Array;
-        basePath?: Resource | string;
-        show?: boolean;
-        modelMatrix?: Matrix4;
-        scale?: number;
-        minimumPixelSize?: number;
-        maximumScale?: number;
-        id?: any;
-        allowPicking?: boolean;
-        incrementallyLoadTextures?: boolean;
-        asynchronous?: boolean;
-        clampAnimations?: boolean;
-        shadows?: ShadowMode;
-        debugShowBoundingVolume?: boolean;
-        debugWireframe?: boolean;
-        heightReference?: HeightReference;
-        scene?: Scene;
-        distanceDisplayCondition?: DistanceDisplayCondition;
-        color?: Color;
-        colorBlendMode?: ColorBlendMode;
-        colorBlendAmount?: number;
-        silhouetteColor?: Color;
-        silhouetteSize?: number;
-        clippingPlanes?: ClippingPlaneCollection;
-        dequantizeInShader?: boolean;
-        lightColor?: Cartesian3;
-        imageBasedLighting?: ImageBasedLighting;
-        credit?: Credit | string;
-        showCreditsOnScreen?: boolean;
-        backFaceCulling?: boolean;
-        showOutline?: boolean;
-        splitDirection?: SplitDirection;
-    });
-    /**
-     * Determines if the model primitive will be shown.
-     */
-    show: boolean;
-    /**
-     * The silhouette color.
-     */
-    silhouetteColor: Color;
-    /**
-     * The size of the silhouette in pixels.
-     */
-    silhouetteSize: number;
-    /**
-     * The 4x4 transformation matrix that transforms the model from model to world coordinates.
-     * When this is the identity matrix, the model is drawn in world coordinates, i.e., Earth's WGS84 coordinates.
-     * Local reference frames can be used by providing a different transformation matrix, like that returned
-     * by {@link Transforms.eastNorthUpToFixedFrame}.
-     * @example
-     * const origin = Cesium.Cartesian3.fromDegrees(-95.0, 40.0, 200000.0);
-     * m.modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(origin);
-     */
-    modelMatrix: Matrix4;
-    /**
-     * A uniform scale applied to this model before the {@link Model#modelMatrix}.
-     * Values greater than <code>1.0</code> increase the size of the model; values
-     * less than <code>1.0</code> decrease.
-     */
-    scale: number;
-    /**
-     * The approximate minimum pixel size of the model regardless of zoom.
-     * This can be used to ensure that a model is visible even when the viewer
-     * zooms out.  When <code>0.0</code>, no minimum size is enforced.
-     */
-    minimumPixelSize: number;
-    /**
-     * The maximum scale size for a model. This can be used to give
-     * an upper limit to the {@link Model#minimumPixelSize}, ensuring that the model
-     * is never an unreasonable scale.
-     */
-    maximumScale: number;
-    /**
-     * User-defined object returned when the model is picked.
-     */
-    id: any;
-    /**
-     * Returns the height reference of the model
-     */
-    heightReference: HeightReference;
-    /**
-     * The currently playing glTF animations.
-     */
-    activeAnimations: ModelAnimationCollection;
-    /**
-     * Determines if the model's animations should hold a pose over frames where no keyframes are specified.
-     */
-    clampAnimations: boolean;
-    /**
-     * Determines whether the model casts or receives shadows from light sources.
-     */
-    shadows: ShadowMode;
-    /**
-     * A color that blends with the model's rendered color.
-     */
-    color: Color;
-    /**
-     * Defines how the color blends with the model.
-     */
-    colorBlendMode: ColorBlendMode;
-    /**
-     * Value used to determine the color strength when the <code>colorBlendMode</code> is <code>MIX</code>.
-     * A value of 0.0 results in the model's rendered color while a value of 1.0 results in a solid color, with
-     * any value in-between resulting in a mix of the two.
-     */
-    colorBlendAmount: number;
-    /**
-     * Whether to cull back-facing geometry. When true, back face culling is
-     * determined by the material's doubleSided property; when false, back face
-     * culling is disabled. Back faces are not culled if {@link Model#color} is
-     * translucent or {@link Model#silhouetteSize} is greater than 0.0.
-     */
-    backFaceCulling: boolean;
-    /**
-     * Whether to display the outline for models using the
-     * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension.
-     * When true, outlines are displayed. When false, outlines are not displayed.
-     */
-    readonly showOutline: boolean;
-    /**
-     * The {@link SplitDirection} to apply to this model.
-     */
-    splitDirection: SplitDirection;
-    /**
-     * This property is for debugging only; it is not for production use nor is it optimized.
-     * <p>
-     * Draws the bounding sphere for each draw command in the model.  A glTF primitive corresponds
-     * to one draw command.  A glTF mesh has an array of primitives, often of length one.
-     * </p>
-     */
-    debugShowBoundingVolume: boolean;
-    /**
-     * This property is for debugging only; it is not for production use nor is it optimized.
-     * <p>
-     * Draws the model in wireframe.
-     * </p>
-     */
-    debugWireframe: boolean;
-    /**
-     * The object for the glTF JSON, including properties with default values omitted
-     * from the JSON provided to this model.
-     */
-    readonly gltf: any;
-    /**
-     * The base path that paths in the glTF JSON are relative to.  The base
-     * path is the same path as the path containing the .gltf file
-     * minus the .gltf file, when binary, image, and shader files are
-     * in the same directory as the .gltf.  When this is <code>''</code>,
-     * the app's base path is used.
-     */
-    readonly basePath: string;
-    /**
-     * The model's bounding sphere in its local coordinate system.  This does not take into
-     * account glTF animations and skins nor does it take into account {@link Model#minimumPixelSize}.
-     * @example
-     * // Center in WGS84 coordinates
-     * const center = Cesium.Matrix4.multiplyByPoint(model.modelMatrix, model.boundingSphere.center, new Cesium.Cartesian3());
-     */
-    readonly boundingSphere: BoundingSphere;
-    /**
-     * When <code>true</code>, this model is ready to render, i.e., the external binary, image,
-     * and shader files were downloaded and the WebGL resources were created.  This is set to
-     * <code>true</code> right before {@link Model#readyPromise} is resolved.
-     */
-    readonly ready: boolean;
-    /**
-     * Gets the promise that will be resolved when this model is ready to render, i.e., when the external binary, image,
-     * and shader files were downloaded and the WebGL resources were created.
-     * <p>
-     * This promise is resolved at the end of the frame before the first frame the model is rendered in.
-     * </p>
-     * @example
-     * // Play all animations at half-speed when the model is ready to render
-     * Promise.resolve(model.readyPromise).then(function(model) {
-     *   model.activeAnimations.addAll({
-     *     multiplier : 0.5
-     *   });
-     * }).catch(function(error){
-     *   window.alert(error);
-     * });
-     */
-    readonly readyPromise: Promise<Model>;
-    /**
-     * Determines if model WebGL resource creation will be spread out over several frames or
-     * block until completion once all glTF files are loaded.
-     */
-    readonly asynchronous: boolean;
-    /**
-     * When <code>true</code>, each glTF mesh and primitive is pickable with {@link Scene#pick}.  When <code>false</code>, GPU memory is saved.
-     */
-    readonly allowPicking: boolean;
-    /**
-     * Determine if textures may continue to stream in after the model is loaded.
-     */
-    readonly incrementallyLoadTextures: boolean;
-    /**
-     * Return the number of pending texture loads.
-     */
-    readonly pendingTextureLoads: number;
-    /**
-     * Gets or sets the condition specifying at what distance from the camera that this model will be displayed.
-     */
-    distanceDisplayCondition: DistanceDisplayCondition;
-    /**
-     * The {@link ClippingPlaneCollection} used to selectively disable rendering the model.
-     */
-    clippingPlanes: ClippingPlaneCollection;
-    /**
-     * The light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
-     * <p>
-     * For example, disabling additional light sources by setting
-     * <code>model.imageBasedLighting.imageBasedLightingFactor = new Cesium.Cartesian2(0.0, 0.0)</code>
-     * will make the model much darker. Here, increasing the intensity of the light source will make the model brighter.
-     * </p>
-     */
-    lightColor: Cartesian3;
-    /**
-     * The properties for managing image-based lighting on this model.
-     */
-    imageBasedLighting: ImageBasedLighting;
-    /**
-     * Gets the credit that will be displayed for the model
-     */
-    credit: Credit;
-    /**
-     * Gets or sets whether the credits of the model will be displayed on the screen
-     */
-    showCreditsOnScreen: boolean;
-    /**
-     * Determines if silhouettes are supported.
-     * @param scene - The scene.
-     * @returns <code>true</code> if silhouettes are supported; otherwise, returns <code>false</code>
-     */
-    static silhouetteSupported(scene: Scene): boolean;
-    /**
-     * <p>
-     * Creates a model from a glTF asset.  When the model is ready to render, i.e., when the external binary, image,
-     * and shader files are downloaded and the WebGL resources are created, the {@link Model#readyPromise} is resolved.
-     * </p>
-     * <p>
-     * The model can be a traditional glTF asset with a .gltf extension or a Binary glTF using the .glb extension.
-     * </p>
-     * <p>
-     * Cesium supports glTF assets with the following extensions:
-     * <ul>
-     * <li>
-     * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Khronos/KHR_binary_glTF/README.md|KHR_binary_glTF (glTF 1.0)}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Khronos/KHR_materials_common/README.md|KHR_materials_common (glTF 1.0)}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Vendor/WEB3D_quantized_attributes/README.md|WEB3D_quantized_attributes (glTF 1.0)}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/AGI_articulations/README.md|AGI_articulations}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/pull/1302|KHR_blend (draft)}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md|KHR_draco_mesh_compression}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/README.md|KHR_materials_pbrSpecularGlossiness}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit/README.md|KHR_materials_unlit}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_techniques_webgl/README.md|KHR_techniques_webgl}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_transform/README.md|KHR_texture_transform}
-     * </li><li>
-     * {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu/README.md|KHR_texture_basisu}
-     * </li>
-     * </ul>
-     * </p>
-     * <p>
-     * For high-precision rendering, Cesium supports the {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Vendor/CESIUM_RTC/README.md|CESIUM_RTC} extension, which introduces the
-     * CESIUM_RTC_MODELVIEW parameter semantic that says the node is in WGS84 coordinates translated
-     * relative to a local origin.
-     * </p>
-     * @example
-     * // Example 1. Create a model from a glTF asset
-     * const model = scene.primitives.add(Cesium.Model.fromGltf({
-     *   url : './duck/duck.gltf'
-     * }));
-     * @example
-     * // Example 2. Create model and provide all properties and events
-     * const origin = Cesium.Cartesian3.fromDegrees(-95.0, 40.0, 200000.0);
-     * const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(origin);
-     *
-     * const model = scene.primitives.add(Cesium.Model.fromGltf({
-     *   url : './duck/duck.gltf',
-     *   show : true,                     // default
-     *   modelMatrix : modelMatrix,
-     *   scale : 2.0,                     // double size
-     *   minimumPixelSize : 128,          // never smaller than 128 pixels
-     *   maximumScale: 20000,             // never larger than 20000 * model size (overrides minimumPixelSize)
-     *   allowPicking : false,            // not pickable
-     *   debugShowBoundingVolume : false, // default
-     *   debugWireframe : false
-     * }));
-     *
-     * model.readyPromise.then(function(model) {
-     *   // Play all animations when the model is ready to render
-     *   model.activeAnimations.addAll();
-     * });
-     * @param options - Object with the following properties:
-     * @param options.url - The url to the .gltf file.
-     * @param [options.basePath] - The base path that paths in the glTF JSON are relative to.
-     * @param [options.show = true] - Determines if the model primitive will be shown.
-     * @param [options.modelMatrix = Matrix4.IDENTITY] - The 4x4 transformation matrix that transforms the model from model to world coordinates.
-     * @param [options.scale = 1.0] - A uniform scale applied to this model.
-     * @param [options.minimumPixelSize = 0.0] - The approximate minimum pixel size of the model regardless of zoom.
-     * @param [options.maximumScale] - The maximum scale for the model.
-     * @param [options.id] - A user-defined object to return when the model is picked with {@link Scene#pick}.
-     * @param [options.allowPicking = true] - When <code>true</code>, each glTF mesh and primitive is pickable with {@link Scene#pick}.
-     * @param [options.incrementallyLoadTextures = true] - Determine if textures may continue to stream in after the model is loaded.
-     * @param [options.asynchronous = true] - Determines if model WebGL resource creation will be spread out over several frames or block until completion once all glTF files are loaded.
-     * @param [options.clampAnimations = true] - Determines if the model's animations should hold a pose over frames where no keyframes are specified.
-     * @param [options.shadows = ShadowMode.ENABLED] - Determines whether the model casts or receives shadows from light sources.
-     * @param [options.debugShowBoundingVolume = false] - For debugging only. Draws the bounding sphere for each draw command in the model.
-     * @param [options.debugWireframe = false] - For debugging only. Draws the model in wireframe.
-     * @param [options.heightReference = HeightReference.NONE] - Determines how the model is drawn relative to terrain.
-     * @param [options.scene] - Must be passed in for models that use the height reference property.
-     * @param [options.distanceDisplayCondition] - The condition specifying at what distance from the camera that this model will be displayed.
-     * @param [options.color = Color.WHITE] - A color that blends with the model's rendered color.
-     * @param [options.colorBlendMode = ColorBlendMode.HIGHLIGHT] - Defines how the color blends with the model.
-     * @param [options.colorBlendAmount = 0.5] - Value used to determine the color strength when the <code>colorBlendMode</code> is <code>MIX</code>. A value of 0.0 results in the model's rendered color while a value of 1.0 results in a solid color, with any value in-between resulting in a mix of the two.
-     * @param [options.silhouetteColor = Color.RED] - The silhouette color. If more than 256 models have silhouettes enabled, there is a small chance that overlapping models will have minor artifacts.
-     * @param [options.silhouetteSize = 0.0] - The size of the silhouette in pixels.
-     * @param [options.clippingPlanes] - The {@link ClippingPlaneCollection} used to selectively disable rendering the model.
-     * @param [options.dequantizeInShader = true] - Determines if a {@link https://github.com/google/draco|Draco} encoded model is dequantized on the GPU. This decreases total memory usage for encoded models. Deprecated in CesiumJS 1.94, will be removed in CesiumJS 1.97.
-     * @param [options.lightColor] - The light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
-     * @param [options.imageBasedLighting] - The properties for managing image-based lighting for this tileset.
-     * @param [options.credit] - A credit for the model, which is displayed on the canvas.
-     * @param [options.showCreditsOnScreen = false] - Whether to display the credits of this model on screen.
-     * @param [options.backFaceCulling = true] - Whether to cull back-facing geometry. When true, back face culling is determined by the material's doubleSided property; when false, back face culling is disabled. Back faces are not culled if {@link Model#color} is translucent or {@link Model#silhouetteSize} is greater than 0.0.
-     * @param [options.showOutline = true] - Whether to display the outline for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. When true, outlines are displayed. When false, outlines are not displayed.
-     * @returns The newly created model.
-     */
-    static fromGltf(options: {
-        url: Resource | string;
-        basePath?: Resource | string;
-        show?: boolean;
-        modelMatrix?: Matrix4;
-        scale?: number;
-        minimumPixelSize?: number;
-        maximumScale?: number;
-        id?: any;
-        allowPicking?: boolean;
-        incrementallyLoadTextures?: boolean;
-        asynchronous?: boolean;
-        clampAnimations?: boolean;
-        shadows?: ShadowMode;
-        debugShowBoundingVolume?: boolean;
-        debugWireframe?: boolean;
-        heightReference?: HeightReference;
-        scene?: Scene;
-        distanceDisplayCondition?: DistanceDisplayCondition;
-        color?: Color;
-        colorBlendMode?: ColorBlendMode;
-        colorBlendAmount?: number;
-        silhouetteColor?: Color;
-        silhouetteSize?: number;
-        clippingPlanes?: ClippingPlaneCollection;
-        dequantizeInShader?: boolean;
-        lightColor?: Cartesian3;
-        imageBasedLighting?: ImageBasedLighting;
-        credit?: Credit | string;
-        showCreditsOnScreen?: boolean;
-        backFaceCulling?: boolean;
-        showOutline?: boolean;
-    }): Model;
-    /**
-     * Returns the glTF node with the given <code>name</code> property.  This is used to
-     * modify a node's transform for animation outside of glTF animations.
-     * @example
-     * // Apply non-uniform scale to node LOD3sp
-     * const node = model.getNode('LOD3sp');
-     * node.matrix = Cesium.Matrix4.fromScale(new Cesium.Cartesian3(5.0, 1.0, 1.0), node.matrix);
-     * @param name - The glTF name of the node.
-     * @returns The node or <code>undefined</code> if no node with <code>name</code> exists.
-     */
-    getNode(name: string): ModelNode;
-    /**
-     * Returns the glTF mesh with the given <code>name</code> property.
-     * @param name - The glTF name of the mesh.
-     * @returns The mesh or <code>undefined</code> if no mesh with <code>name</code> exists.
-     */
-    getMesh(name: string): ModelMesh;
-    /**
-     * Returns the glTF material with the given <code>name</code> property.
-     * @param name - The glTF name of the material.
-     * @returns The material or <code>undefined</code> if no material with <code>name</code> exists.
-     */
-    getMaterial(name: string): ModelMaterial;
-    /**
-     * Sets the current value of an articulation stage.  After setting one or multiple stage values, call
-     * Model.applyArticulations() to cause the node matrices to be recalculated.
-     * @param articulationStageKey - The name of the articulation, a space, and the name of the stage.
-     * @param value - The numeric value of this stage of the articulation.
-     */
-    setArticulationStage(articulationStageKey: string, value: number): void;
-    /**
-     * Applies any modified articulation stages to the matrix of each node that participates
-     * in any articulation.  Note that this will overwrite any nodeTransformations on participating nodes.
-     */
-    applyArticulations(): void;
-    /**
-     * Called when {@link Viewer} or {@link CesiumWidget} render the scene to
-     * get the draw commands needed to render this primitive.
-     * <p>
-     * Do not call this function directly.  This is documented just to
-     * list the exceptions that may be propagated when the scene is rendered:
-     * </p>
-     */
-    update(): void;
-    /**
-     * Returns true if this object was destroyed; otherwise, false.
-     * <br /><br />
-     * If this object was destroyed, it should not be used; calling any function other than
-     * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.
-     * @returns <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
-     */
-    isDestroyed(): boolean;
-    /**
-     * Destroys the WebGL resources held by this object.  Destroying an object allows for deterministic
-     * release of WebGL resources, instead of relying on the garbage collector to destroy this object.
-     * <br /><br />
-     * Once an object is destroyed, it should not be used; calling any function other than
-     * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.  Therefore,
-     * assign the return value (<code>undefined</code>) to the object as done in the example.
-     * @example
-     * model = model && model.destroy();
-     */
-    destroy(): void;
-}
-
-/**
- * An active glTF animation.  A glTF asset can contain animations.  An active animation
- * is an animation that is currently playing or scheduled to be played because it was
- * added to a model's {@link ModelAnimationCollection}.  An active animation is an
- * instance of an animation; for example, there can be multiple active animations
- * for the same glTF animation, each with a different start time.
- * <p>
- * Create this by calling {@link ModelAnimationCollection#add}.
- * </p>
- */
-export class ModelAnimation {
-    constructor();
-    /**
-     * When <code>true</code>, the animation is removed after it stops playing.
-     * This is slightly more efficient that not removing it, but if, for example,
-     * time is reversed, the animation is not played again.
-     */
-    removeOnStop: boolean;
-    /**
-     * The event fired when this animation is started.  This can be used, for
-     * example, to play a sound or start a particle system, when the animation starts.
-     * <p>
-     * This event is fired at the end of the frame after the scene is rendered.
-     * </p>
-     * @example
-     * animation.start.addEventListener(function(model, animation) {
-     *   console.log(`Animation started: ${animation.name}`);
-     * });
-     */
-    start: Event;
-    /**
-     * The event fired when on each frame when this animation is updated.  The
-     * current time of the animation, relative to the glTF animation time span, is
-     * passed to the event, which allows, for example, starting new animations at a
-     * specific time relative to a playing animation.
-     * <p>
-     * This event is fired at the end of the frame after the scene is rendered.
-     * </p>
-     * @example
-     * animation.update.addEventListener(function(model, animation, time) {
-     *   console.log(`Animation updated: ${animation.name}. glTF animation time: ${time}`);
-     * });
-     */
-    update: Event;
-    /**
-     * The event fired when this animation is stopped.  This can be used, for
-     * example, to play a sound or start a particle system, when the animation stops.
-     * <p>
-     * This event is fired at the end of the frame after the scene is rendered.
-     * </p>
-     * @example
-     * animation.stop.addEventListener(function(model, animation) {
-     *   console.log(`Animation stopped: ${animation.name}`);
-     * });
-     */
-    stop: Event;
-    /**
-     * The glTF animation name that identifies this animation.
-     */
-    readonly name: string;
-    /**
-     * The scene time to start playing this animation.  When this is <code>undefined</code>,
-     * the animation starts at the next frame.
-     */
-    readonly startTime: JulianDate;
-    /**
-     * The delay, in seconds, from {@link ModelAnimation#startTime} to start playing.
-     */
-    readonly delay: number;
-    /**
-     * The scene time to stop playing this animation.  When this is <code>undefined</code>,
-     * the animation is played for its full duration and perhaps repeated depending on
-     * {@link ModelAnimation#loop}.
-     */
-    readonly stopTime: JulianDate;
-    /**
-     * Values greater than <code>1.0</code> increase the speed that the animation is played relative
-     * to the scene clock speed; values less than <code>1.0</code> decrease the speed.  A value of
-     * <code>1.0</code> plays the animation at the speed in the glTF animation mapped to the scene
-     * clock speed.  For example, if the scene is played at 2x real-time, a two-second glTF animation
-     * will play in one second even if <code>multiplier</code> is <code>1.0</code>.
-     */
-    readonly multiplier: number;
-    /**
-     * When <code>true</code>, the animation is played in reverse.
-     */
-    readonly reverse: boolean;
-    /**
-     * Determines if and how the animation is looped.
-     */
-    readonly loop: ModelAnimationLoop;
-    /**
-     * If this is defined, it will be used to compute the local animation time
-     * instead of the scene's time.
-     */
-    animationTime: ModelAnimation.AnimationTimeCallback;
-}
-
-export namespace ModelAnimation {
-    /**
-     * A function used to compute the local animation time for a ModelAnimation.
-     * @example
-     * // Use real time for model animation (assuming animateWhilePaused was set to true)
-     * function animationTime(duration) {
-     *     return Date.now() / 1000 / duration;
-     * }
-     * @example
-     * // Offset the phase of the animation, so it starts halfway through its cycle.
-     * function animationTime(duration, seconds) {
-     *     return seconds / duration + 0.5;
-     * }
-     * @param duration - The animation's original duration in seconds.
-     * @param seconds - The seconds since the animation started, in scene time.
-     */
-    type AnimationTimeCallback = (duration: number, seconds: number) => number;
-}
-
-/**
- * A collection of active model animations.  Access this using {@link Model#activeAnimations}.
- */
-export class ModelAnimationCollection {
-    constructor();
-    /**
-     * The event fired when an animation is added to the collection.  This can be used, for
-     * example, to keep a UI in sync.
-     * @example
-     * model.activeAnimations.animationAdded.addEventListener(function(model, animation) {
-     *   console.log(`Animation added: ${animation.name}`);
-     * });
-     */
-    animationAdded: Event;
-    /**
-     * The event fired when an animation is removed from the collection.  This can be used, for
-     * example, to keep a UI in sync.
-     * @example
-     * model.activeAnimations.animationRemoved.addEventListener(function(model, animation) {
-     *   console.log(`Animation removed: ${animation.name}`);
-     * });
-     */
-    animationRemoved: Event;
-    /**
-     * When true, the animation will play even when the scene time is paused. However,
-     * whether animation takes place will depend on the animationTime functions assigned
-     * to the model's animations. By default, this is based on scene time, so models using
-     * the default will not animate regardless of this setting.
-     */
-    animateWhilePaused: boolean;
-    /**
-     * The number of animations in the collection.
-     */
-    readonly length: number;
-    /**
-     * Creates and adds an animation with the specified initial properties to the collection.
-     * <p>
-     * This raises the {@link ModelAnimationCollection#animationAdded} event so, for example, a UI can stay in sync.
-     * </p>
-     * @example
-     * // Example 1. Add an animation by name
-     * model.activeAnimations.add({
-     *   name : 'animation name'
-     * });
-     *
-     * // Example 2. Add an animation by index
-     * model.activeAnimations.add({
-     *   index : 0
-     * });
-     * @example
-     * // Example 3. Add an animation and provide all properties and events
-     * const startTime = Cesium.JulianDate.now();
-     *
-     * const animation = model.activeAnimations.add({
-     *   name : 'another animation name',
-     *   startTime : startTime,
-     *   delay : 0.0,                          // Play at startTime (default)
-     *   stopTime : Cesium.JulianDate.addSeconds(startTime, 4.0, new Cesium.JulianDate()),
-     *   removeOnStop : false,                 // Do not remove when animation stops (default)
-     *   multiplier : 2.0,                        // Play at double speed
-     *   reverse : true,                       // Play in reverse
-     *   loop : Cesium.ModelAnimationLoop.REPEAT      // Loop the animation
-     * });
-     *
-     * animation.start.addEventListener(function(model, animation) {
-     *   console.log(`Animation started: ${animation.name}`);
-     * });
-     * animation.update.addEventListener(function(model, animation, time) {
-     *   console.log(`Animation updated:  ${animation.name}. glTF animation time: ${time}`);
-     * });
-     * animation.stop.addEventListener(function(model, animation) {
-     *   console.log(`Animation stopped: ${animation.name}`);
-     * });
-     * @param options - Object with the following properties:
-     * @param [options.name] - The glTF animation name that identifies the animation. Must be defined if <code>options.index</code> is <code>undefined</code>.
-     * @param [options.index] - The glTF animation index that identifies the animation. Must be defined if <code>options.name</code> is <code>undefined</code>.
-     * @param [options.startTime] - The scene time to start playing the animation.  When this is <code>undefined</code>, the animation starts at the next frame.
-     * @param [options.delay = 0.0] - The delay, in seconds, from <code>startTime</code> to start playing.
-     * @param [options.stopTime] - The scene time to stop playing the animation.  When this is <code>undefined</code>, the animation is played for its full duration.
-     * @param [options.removeOnStop = false] - When <code>true</code>, the animation is removed after it stops playing.
-     * @param [options.multiplier = 1.0] - Values greater than <code>1.0</code> increase the speed that the animation is played relative to the scene clock speed; values less than <code>1.0</code> decrease the speed.
-     * @param [options.reverse = false] - When <code>true</code>, the animation is played in reverse.
-     * @param [options.loop = ModelAnimationLoop.NONE] - Determines if and how the animation is looped.
-     * @param [options.animationTime] - If defined, computes the local animation time for this animation.
-     * @returns The animation that was added to the collection.
-     */
-    add(options: {
-        name?: string;
-        index?: number;
-        startTime?: JulianDate;
-        delay?: number;
-        stopTime?: JulianDate;
-        removeOnStop?: boolean;
-        multiplier?: number;
-        reverse?: boolean;
-        loop?: ModelAnimationLoop;
-        animationTime?: ModelAnimation.AnimationTimeCallback;
-    }): ModelAnimation;
-    /**
-     * Creates and adds an animation with the specified initial properties to the collection
-     * for each animation in the model.
-     * <p>
-     * This raises the {@link ModelAnimationCollection#animationAdded} event for each model so, for example, a UI can stay in sync.
-     * </p>
-     * @example
-     * model.activeAnimations.addAll({
-     *   multiplier : 0.5,                        // Play at half-speed
-     *   loop : Cesium.ModelAnimationLoop.REPEAT      // Loop the animations
-     * });
-     * @param [options] - Object with the following properties:
-     * @param [options.startTime] - The scene time to start playing the animations.  When this is <code>undefined</code>, the animations starts at the next frame.
-     * @param [options.delay = 0.0] - The delay, in seconds, from <code>startTime</code> to start playing.
-     * @param [options.stopTime] - The scene time to stop playing the animations.  When this is <code>undefined</code>, the animations are played for its full duration.
-     * @param [options.removeOnStop = false] - When <code>true</code>, the animations are removed after they stop playing.
-     * @param [options.multiplier = 1.0] - Values greater than <code>1.0</code> increase the speed that the animations play relative to the scene clock speed; values less than <code>1.0</code> decrease the speed.
-     * @param [options.reverse = false] - When <code>true</code>, the animations are played in reverse.
-     * @param [options.loop = ModelAnimationLoop.NONE] - Determines if and how the animations are looped.
-     * @param [options.animationTime] - If defined, computes the local animation time for all of the animations.
-     * @returns An array of {@link ModelAnimation} objects, one for each animation added to the collection.  If there are no glTF animations, the array is empty.
-     */
-    addAll(options?: {
-        startTime?: JulianDate;
-        delay?: number;
-        stopTime?: JulianDate;
-        removeOnStop?: boolean;
-        multiplier?: number;
-        reverse?: boolean;
-        loop?: ModelAnimationLoop;
-        animationTime?: ModelAnimation.AnimationTimeCallback;
-    }): ModelAnimation[];
-    /**
-     * Removes an animation from the collection.
-     * <p>
-     * This raises the {@link ModelAnimationCollection#animationRemoved} event so, for example, a UI can stay in sync.
-     * </p>
-     * <p>
-     * An animation can also be implicitly removed from the collection by setting {@link ModelAnimation#removeOnStop} to
-     * <code>true</code>.  The {@link ModelAnimationCollection#animationRemoved} event is still fired when the animation is removed.
-     * </p>
-     * @example
-     * const a = model.activeAnimations.add({
-     *   name : 'animation name'
-     * });
-     * model.activeAnimations.remove(a); // Returns true
-     * @param animation - The animation to remove.
-     * @returns <code>true</code> if the animation was removed; <code>false</code> if the animation was not found in the collection.
-     */
-    remove(animation: ModelAnimation): boolean;
-    /**
-     * Removes all animations from the collection.
-     * <p>
-     * This raises the {@link ModelAnimationCollection#animationRemoved} event for each
-     * animation so, for example, a UI can stay in sync.
-     * </p>
-     */
-    removeAll(): void;
-    /**
-     * Determines whether this collection contains a given animation.
-     * @param animation - The animation to check for.
-     * @returns <code>true</code> if this collection contains the animation, <code>false</code> otherwise.
-     */
-    contains(animation: ModelAnimation): boolean;
-    /**
-     * Returns the animation in the collection at the specified index.  Indices are zero-based
-     * and increase as animations are added.  Removing an animation shifts all animations after
-     * it to the left, changing their indices.  This function is commonly used to iterate over
-     * all the animations in the collection.
-     * @example
-     * // Output the names of all the animations in the collection.
-     * const animations = model.activeAnimations;
-     * const length = animations.length;
-     * for (let i = 0; i < length; ++i) {
-     *   console.log(animations.get(i).name);
-     * }
-     * @param index - The zero-based index of the animation.
-     * @returns The animation at the specified index.
-     */
-    get(index: number): ModelAnimation;
-}
-
-/**
- * Determines if and how a glTF animation is looped.
- */
-export enum ModelAnimationLoop {
-    /**
-     * Play the animation once; do not loop it.
-     */
-    NONE = 0,
-    /**
-     * Loop the animation playing it from the start immediately after it stops.
-     */
-    REPEAT = 1,
-    /**
-     * Loop the animation.  First, playing it forward, then in reverse, then forward, and so on.
-     */
-    MIRRORED_REPEAT = 2
-}
-
-/**
  * An object describing a uniform, its type, and an initial value
  * @property type - The Glsl type of the uniform.
  * @property value - The initial value of the uniform
@@ -35514,7 +34625,7 @@ export type UniformSpecifier = {
 };
 
 /**
- * A user defined GLSL shader used with {@link ModelExperimental} as well
+ * A user defined GLSL shader used with {@link Model} as well
  * as {@link Cesium3DTileset}.
  * <p>
  * If texture uniforms are used, additional resource management must be done:
@@ -35522,7 +34633,7 @@ export type UniformSpecifier = {
  * <ul>
  *   <li>
  *      The <code>update</code> function must be called each frame. When a
- *      custom shader is passed to a {@link ModelExperimental} or a
+ *      custom shader is passed to a {@link Model} or a
  *      {@link Cesium3DTileset}, this step is handled automaticaly
  *   </li>
  *   <li>
@@ -35531,9 +34642,6 @@ export type UniformSpecifier = {
  *      is responsible for calling this method.
  *   </li>
  * </ul>
- * <p>
- * To enable the use of {@link ModelExperimental} in {@link Cesium3DTileset}, set {@link ExperimentalFeatures.enableModelExperimental} to <code>true</code> or tileset.enableModelExperimental to <code>true</code>.
- * </p>
  * <p>
  * See the {@link https://github.com/CesiumGS/cesium/tree/main/Documentation/CustomShaderGuide|Custom Shader Guide} for more detailed documentation.
  * </p>
@@ -35570,7 +34678,7 @@ export type UniformSpecifier = {
  * @param options - An object with the following options
  * @param [options.mode = CustomShaderMode.MODIFY_MATERIAL] - The custom shader mode, which determines how the custom shader code is inserted into the fragment shader.
  * @param [options.lightingModel] - The lighting model (e.g. PBR or unlit). If present, this overrides the default lighting for the model.
- * @param [options.isTranslucent = false] - If set, the model will be rendered as translucent. This overrides the default settings for the model.
+ * @param [options.translucencyMode = CustomShaderTranslucencyMode.INHERIT] - The translucency mode, which determines how the custom shader will be applied. If the value is CustomShaderTransulcencyMode.OPAQUE or CustomShaderTransulcencyMode.TRANSLUCENT, the custom shader will override settings from the model's material. If the value is CustomShaderTransulcencyMode.INHERIT, the custom shader will render as either opaque or translucent depending on the primitive's material settings.
  * @param [options.uniforms] - A dictionary for user-defined uniforms. The key is the uniform name that will appear in the GLSL code. The value is an object that describes the uniform type and initial value
  * @param [options.varyings] - A dictionary for declaring additional GLSL varyings used in the shader. The key is the varying name that will appear in the GLSL code. The value is the data type of the varying. For each varying, the declaration will be added to the top of the shader automatically. The caller is responsible for assigning a value in the vertex shader and using the value in the fragment shader.
  * @param [options.vertexShaderText] - The custom vertex shader as a string of GLSL code. It must include a GLSL function called vertexMain. See the example for the expected signature. If not specified, the custom vertex shader step will be skipped in the computed vertex shader.
@@ -35580,7 +34688,7 @@ export class CustomShader {
     constructor(options: {
         mode?: CustomShaderMode;
         lightingModel?: LightingModel;
-        isTranslucent?: boolean;
+        translucencyMode?: CustomShaderTranslucencyMode;
         uniforms?: {
             [key: string]: UniformSpecifier;
         };
@@ -35591,54 +34699,50 @@ export class CustomShader {
         fragmentShaderText?: string;
     });
     /**
+     * A value determining how the custom shader interacts with the overall
+     * fragment shader. This is used by {@link CustomShaderPipelineStage}
+     */
+    readonly mode: CustomShaderMode;
+    /**
+     * The lighting model to use when using the custom shader.
+     * This is used by {@link CustomShaderPipelineStage}
+     */
+    readonly lightingModel: LightingModel;
+    /**
+     * Additional uniforms as declared by the user.
+     */
+    readonly uniforms: {
+        [key: string]: UniformSpecifier;
+    };
+    /**
+     * Additional varyings as declared by the user.
+     * This is used by {@link CustomShaderPipelineStage}
+     */
+    readonly varyings: {
+        [key: string]: VaryingType;
+    };
+    /**
+     * The user-defined GLSL code for the vertex shader
+     */
+    readonly vertexShaderText: string;
+    /**
+     * The user-defined GLSL code for the fragment shader
+     */
+    readonly fragmentShaderText: string;
+    /**
+     * The translucency mode, which determines how the custom shader will be applied. If the value is
+     * CustomShaderTransulcencyMode.OPAQUE or CustomShaderTransulcencyMode.TRANSLUCENT, the custom shader
+     * will override settings from the model's material. If the value isCustomShaderTransulcencyMode.INHERIT,
+     * the custom shader will render as either opaque or translucent depending on the primitive's material settings.
+     */
+    readonly translucencyMode: CustomShaderTranslucencyMode;
+    /**
      * Update the value of a uniform declared in the shader
      * @param uniformName - The GLSL name of the uniform. This must match one of the uniforms declared in the constructor
      * @param value - The new value of the uniform.
      */
     setUniform(uniformName: string, value: boolean | number | Cartesian2 | Cartesian3 | Cartesian4 | Matrix2 | Matrix3 | Matrix4 | string | Resource): void;
 }
-
-/**
- * A value determining how the custom shader interacts with the overall
- * fragment shader. This is used by {@link CustomShaderPipelineStage}
- */
-export const mode: CustomShaderMode;
-
-/**
- * The lighting model to use when using the custom shader.
- * This is used by {@link CustomShaderPipelineStage}
- */
-export const lightingModel: LightingModel;
-
-/**
- * Additional uniforms as declared by the user.
- */
-export const uniforms: {
-    [key: string]: UniformSpecifier;
-};
-
-/**
- * Additional varyings as declared by the user.
- * This is used by {@link CustomShaderPipelineStage}
- */
-export const varyings: {
-    [key: string]: VaryingType;
-};
-
-/**
- * The user-defined GLSL code for the vertex shader
- */
-export const vertexShaderText: string;
-
-/**
- * The user-defined GLSL code for the fragment shader
- */
-export const fragmentShaderText: string;
-
-/**
- * Whether the shader should be rendered as translucent
- */
-export const isTranslucent: boolean;
 
 /**
  * An enum describing how the {@link CustomShader} will be added to the
@@ -35658,7 +34762,28 @@ export enum CustomShaderMode {
 }
 
 /**
- * The lighting model to use for lighting a {@link ModelExperimental}.
+ * An enum for controling how {@link CustomShader} handles translucency compared with the original
+ * primitive.
+ */
+export enum CustomShaderTranslucencyMode {
+    /**
+     * Inherit translucency settings from the primitive's material. If the primitive used a
+     * translucent material, the custom shader will also be considered translucent. If the primitive
+     * used an opaque material, the custom shader will be considered opaque.
+     */
+    INHERIT = 0,
+    /**
+     * Force the primitive to render the primitive as opaque, ignoring any material settings.
+     */
+    OPAQUE = 1,
+    /**
+     * Force the primitive to render the primitive as translucent, ignoring any material settings.
+     */
+    TRANSLUCENT = 2
+}
+
+/**
+ * The lighting model to use for lighting a {@link Model}.
  */
 export enum LightingModel {
     /**
@@ -35677,10 +34802,41 @@ export enum LightingModel {
 }
 
 /**
- * A 3D model. This is a new architecture that is more decoupled than the older {@link Model}. This class is still experimental.
+ * A 3D model based on glTF, the runtime asset format for WebGL, OpenGL ES, and OpenGL.
  * <p>
  * Do not call this function directly, instead use the `from` functions to create
  * the Model from your source data type.
+ * </p>
+ * <p>
+ * Cesium supports glTF assets with the following extensions:
+ * <ul>
+ *  <li>
+ *  {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/AGI_articulations/README.md|AGI_articulations}
+ *  </li>
+ *  <li>
+ *  {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md|KHR_draco_mesh_compression}
+ *  </li>
+ *  <li>
+ *  {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/README.md|KHR_materials_pbrSpecularGlossiness}
+ *  </li>
+ *  <li>
+ *  {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit/README.md|KHR_materials_unlit}
+ *  </li>
+ *  <li>
+ *  {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_transform/README.md|KHR_texture_transform}
+ *  </li>
+ *  <li>
+ *  {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu|KHR_texture_basisu}
+ *  </li>
+ *  <li>
+ *  {@link https://github.com/KhronosGroup/glTF/blob/master/extensions/1.0/Vendor/CESIUM_RTC/README.md|CESIUM_RTC}
+ *  </li>
+ * </ul>
+ * </p>
+ * <p>
+ * Note: for models with compressed textures using the KHR_texture_basisu extension, we recommend power of 2 textures in both dimensions
+ * for maximum compatibility. This is because some samplers require power of 2 textures ({@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL|Using textures in WebGL})
+ * and KHR_texture_basisu requires multiple of 4 dimensions ({@link https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu/README.md#additional-requirements|KHR_texture_basisu additional requirements}).
  * </p>
  * @param options - Object with the following properties:
  * @param options.resource - The Resource to the 3D model.
@@ -35722,8 +34878,9 @@ export enum LightingModel {
  * @param [options.featureIdLabel = "featureId_0"] - Label of the feature ID set to use for picking and styling. For EXT_mesh_features, this is the feature ID's label property, or "featureId_N" (where N is the index in the featureIds array) when not specified. EXT_feature_metadata did not have a label field, so such feature ID sets are always labeled "featureId_N" where N is the index in the list of all feature Ids, where feature ID attributes are listed before feature ID textures. If featureIdLabel is an integer N, it is converted to the string "featureId_N" automatically. If both per-primitive and per-instance feature IDs are present, the instance feature IDs take priority.
  * @param [options.instanceFeatureIdLabel = "instanceFeatureId_0"] - Label of the instance feature ID set used for picking and styling. If instanceFeatureIdLabel is set to an integer N, it is converted to the string "instanceFeatureId_N" automatically. If both per-primitive and per-instance feature IDs are present, the instance feature IDs take priority.
  * @param [options.pointCloudShading] - Options for constructing a {@link PointCloudShading} object to control point attenuation based on geometric error and lighting.
+ * @param [options.classificationType] - Determines whether terrain, 3D Tiles or both will be classified by this model. This cannot be set after the model has loaded.
  */
-export class ModelExperimental {
+export class Model {
     constructor(options: {
         resource: Resource;
         show?: boolean;
@@ -35764,11 +34921,32 @@ export class ModelExperimental {
         featureIdLabel?: string | number;
         instanceFeatureIdLabel?: string | number;
         pointCloudShading?: any;
+        classificationType?: ClassificationType;
     });
+    /**
+     * The 4x4 transformation matrix that transforms the model from model to world coordinates.
+     * When this is the identity matrix, the model is drawn in world coordinates, i.e., Earth's Cartesian WGS84 coordinates.
+     * Local reference frames can be used by providing a different transformation matrix, like that returned
+     * by {@link Transforms.eastNorthUpToFixedFrame}.
+     * @example
+     * const origin = Cesium.Cartesian3.fromDegrees(-95.0, 40.0, 200000.0);
+     * m.modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(origin);
+     */
+    modelMatrix: Matrix4;
+    /**
+     * Whether to display the outline for models using the
+     * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension.
+     * When true, outlines are displayed. When false, outlines are not displayed.
+     */
+    showOutline: boolean;
+    /**
+     * The color to use when rendering outlines.
+     */
+    outlineColor: Color;
     /**
      * When <code>true</code>, this model is ready to render, i.e., the external binary, image,
      * and shader files were downloaded and the WebGL resources were created.  This is set to
-     * <code>true</code> right before {@link ModelExperimental#readyPromise} is resolved.
+     * <code>true</code> right before {@link Model#readyPromise} is resolved.
      */
     readonly ready: boolean;
     /**
@@ -35778,11 +34956,11 @@ export class ModelExperimental {
      * This promise is resolved at the end of the frame before the first frame the model is rendered in.
      * </p>
      */
-    readonly readyPromise: Promise<ModelExperimental>;
+    readonly readyPromise: Promise<Model>;
     /**
      * The currently playing glTF animations.
      */
-    readonly activeAnimations: ModelExperimentalAnimationCollection;
+    readonly activeAnimations: ModelAnimationCollection;
     /**
      * Determines if the model's animations should hold a pose over frames where no keyframes are specified.
      */
@@ -35813,7 +34991,7 @@ export class ModelExperimental {
      */
     id: any;
     /**
-     * The style to apply the to the features in the model. Cannot be applied if a {@link CustomShader} is also applied.
+     * The style to apply to the features in the model. Cannot be applied if a {@link CustomShader} is also applied.
      */
     style: Cesium3DTileStyle;
     /**
@@ -35839,7 +35017,7 @@ export class ModelExperimental {
     /**
      * Gets the model's bounding sphere in world space. This does not take into account
      * glTF animations, skins, or morph targets. It also does not account for
-     * {@link ModelExperimental#minimumPixelSize}.
+     * {@link Model#minimumPixelSize}.
      */
     readonly boundingSphere: BoundingSphere;
     /**
@@ -35908,8 +35086,8 @@ export class ModelExperimental {
     /**
      * Whether to cull back-facing geometry. When true, back face culling is
      * determined by the material's doubleSided property; when false, back face
-     * culling is disabled. Back faces are not culled if {@link ModelExperimental#color}
-     * is translucent or {@link ModelExperimental#silhouetteSize} is greater than 0.0.
+     * culling is disabled. Back faces are not culled if {@link Model#color}
+     * is translucent or {@link Model#silhouetteSize} is greater than 0.0.
      */
     backFaceCulling: boolean;
     /**
@@ -35935,17 +35113,34 @@ export class ModelExperimental {
      */
     shadows: ShadowMode;
     /**
-     * Gets the credit that will be displayed for the model
+     * Gets the credit that will be displayed for the model.
      */
     readonly credit: Credit;
     /**
-     * Gets or sets whether the credits of the model will be displayed on the screen
+     * Gets or sets whether the credits of the model will be displayed
+     * on the screen.
      */
     showCreditsOnScreen: boolean;
     /**
      * The {@link SplitDirection} to apply to this model.
      */
     splitDirection: SplitDirection;
+    /**
+     * Gets the model's classification type. This determines whether terrain,
+     * 3D Tiles, or both will be classified by this model.
+     * <p>
+     * Additionally, there are a few requirements/limitations:
+     * <ul>
+     *     <li>The glTF cannot contain morph targets, skins, or animations.</li>
+     *     <li>The glTF cannot contain the <code>EXT_mesh_gpu_instancing</code> extension.</li>
+     *     <li>Only meshes with TRIANGLES can be used to classify other assets.</li>
+     *     <li>The position attribute is required.</li>
+     *     <li>If feature IDs and an index buffer are both present, all indices with the same feature id must occupy contiguous sections of the index buffer.</li>
+     *     <li>If feature IDs are present without an index buffer, all positions with the same feature id must occupy contiguous sections of the position buffer.</li>
+     * </ul>
+     * </p>
+     */
+    readonly classificationType: ClassificationType;
     /**
      * Returns the node with the given <code>name</code> in the glTF. This is used to
      * modify a node's transform for user-defined animation.
@@ -35956,10 +35151,10 @@ export class ModelExperimental {
      * @param name - The name of the node in the glTF.
      * @returns The node, or <code>undefined</code> if no node with the <code>name</code> exists.
      */
-    getNode(name: string): ModelExperimentalNode;
+    getNode(name: string): ModelNode;
     /**
      * Sets the current value of an articulation stage.  After setting one or
-     * multiple stage values, call ModelExperimental.applyArticulations() to
+     * multiple stage values, call Model.applyArticulations() to
      * cause the node matrices to be recalculated.
      * @example
      * // Sets the value of the stage named "MoveX" belonging to the articulation named "SampleArticulation"
@@ -35974,6 +35169,11 @@ export class ModelExperimental {
      * transformations on participating nodes.
      */
     applyArticulations(): void;
+    /**
+     * Marks the model's {@link Model#style} as dirty, which forces all features
+     * to re-evaluate the style in the next frame the model is visible.
+     */
+    makeStyleDirty(): void;
     /**
      * Called when {@link Viewer} or {@link CesiumWidget} render the scene to
      * get the draw commands needed to render this primitive.
@@ -36055,6 +35255,7 @@ export class ModelExperimental {
      * @param [options.featureIdLabel = "featureId_0"] - Label of the feature ID set to use for picking and styling. For EXT_mesh_features, this is the feature ID's label property, or "featureId_N" (where N is the index in the featureIds array) when not specified. EXT_feature_metadata did not have a label field, so such feature ID sets are always labeled "featureId_N" where N is the index in the list of all feature Ids, where feature ID attributes are listed before feature ID textures. If featureIdLabel is an integer N, it is converted to the string "featureId_N" automatically. If both per-primitive and per-instance feature IDs are present, the instance feature IDs take priority.
      * @param [options.instanceFeatureIdLabel = "instanceFeatureId_0"] - Label of the instance feature ID set used for picking and styling. If instanceFeatureIdLabel is set to an integer N, it is converted to the string "instanceFeatureId_N" automatically. If both per-primitive and per-instance feature IDs are present, the instance feature IDs take priority.
      * @param [options.pointCloudShading] - Options for constructing a {@link PointCloudShading} object to control point attenuation and lighting.
+     * @param [options.classificationType] - Determines whether terrain, 3D Tiles or both will be classified by this model. This cannot be set after the model has loaded.
      * @returns The newly created model.
      */
     static fromGltf(options: {
@@ -36103,43 +35304,21 @@ export class ModelExperimental {
         featureIdLabel?: string | number;
         instanceFeatureIdLabel?: string | number;
         pointCloudShading?: any;
-    }): ModelExperimental;
+        classificationType?: ClassificationType;
+    }): Model;
 }
-
-/**
- * The 4x4 transformation matrix that transforms the model from model to world coordinates.
- * When this is the identity matrix, the model is drawn in world coordinates, i.e., Earth's Cartesian WGS84 coordinates.
- * Local reference frames can be used by providing a different transformation matrix, like that returned
- * by {@link Transforms.eastNorthUpToFixedFrame}.
- * @example
- * const origin = Cesium.Cartesian3.fromDegrees(-95.0, 40.0, 200000.0);
- * m.modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(origin);
- */
-export var modelMatrix: Matrix4;
-
-/**
- * Whether to display the outline for models using the
- * {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension.
- * When true, outlines are displayed. When false, outlines are not displayed.
- */
-export var showOutline: boolean;
-
-/**
- * The color to use when rendering outlines.
- */
-export var outlineColor: Color;
 
 /**
  * An active animation derived from a glTF asset. An active animation is an
  * animation that is either currently playing or scheduled to be played due to
- * being added to a model's {@link ModelExperimentalAnimationCollection}. An active animation
+ * being added to a model's {@link ModelAnimationCollection}. An active animation
  * is an instance of an animation; for example, there can be multiple active
  * animations for the same glTF animation, each with a different start time.
  * <p>
- * Create this by calling {@link ModelExperimentalAnimationCollection#add}.
+ * Create this by calling {@link ModelAnimationCollection#add}.
  * </p>
  */
-export class ModelExperimentalAnimation {
+export class ModelAnimation {
     constructor();
     /**
      * When <code>true</code>, the animation is removed after it stops playing.
@@ -36195,13 +35374,13 @@ export class ModelExperimentalAnimation {
      */
     readonly startTime: JulianDate;
     /**
-     * The delay, in seconds, from {@link ModelExperimentalAnimation#startTime} to start playing.
+     * The delay, in seconds, from {@link ModelAnimation#startTime} to start playing.
      */
     readonly delay: number;
     /**
      * The scene time to stop playing this animation. When this is <code>undefined</code>,
      * the animation is played for its full duration and perhaps repeated depending on
-     * {@link ModelExperimentalAnimation#loop}.
+     * {@link ModelAnimation#loop}.
      */
     readonly stopTime: JulianDate;
     /**
@@ -36224,12 +35403,12 @@ export class ModelExperimentalAnimation {
      * If this is defined, it will be used to compute the local animation time
      * instead of the scene's time.
      */
-    animationTime: ModelExperimentalAnimation.AnimationTimeCallback;
+    animationTime: ModelAnimation.AnimationTimeCallback;
 }
 
-export namespace ModelExperimentalAnimation {
+export namespace ModelAnimation {
     /**
-     * A function used to compute the local animation time for a ModelExperimentalAnimation.
+     * A function used to compute the local animation time for a ModelAnimation.
      * @example
      * // Use real time for model animation (assuming animateWhilePaused was set to true)
      * function animationTime(duration) {
@@ -36247,9 +35426,9 @@ export namespace ModelExperimentalAnimation {
 }
 
 /**
- * A collection of active model animations. Access this using {@link ModelExperimental#activeAnimations}.
+ * A collection of active model animations. Access this using {@link Model#activeAnimations}.
  */
-export class ModelExperimentalAnimationCollection {
+export class ModelAnimationCollection {
     constructor();
     /**
      * The event fired when an animation is added to the collection.  This can be used, for
@@ -36283,11 +35462,11 @@ export class ModelExperimentalAnimationCollection {
     /**
      * The model that owns this animation collection.
      */
-    readonly model: ModelExperimental;
+    readonly model: Model;
     /**
      * Creates and adds an animation with the specified initial properties to the collection.
      * <p>
-     * This raises the {@link ModelExperimentalAnimationCollection#animationAdded} event so, for example, a UI can stay in sync.
+     * This raises the {@link ModelAnimationCollection#animationAdded} event so, for example, a UI can stay in sync.
      * </p>
      * @example
      * // Example 1. Add an animation by name
@@ -36346,13 +35525,13 @@ export class ModelExperimentalAnimationCollection {
         multiplier?: number;
         reverse?: boolean;
         loop?: ModelAnimationLoop;
-        animationTime?: ModelExperimentalAnimation.AnimationTimeCallback;
-    }): ModelExperimentalAnimation;
+        animationTime?: ModelAnimation.AnimationTimeCallback;
+    }): ModelAnimation;
     /**
      * Creates and adds animations with the specified initial properties to the collection
      * for all animations in the model.
      * <p>
-     * This raises the {@link ModelExperimentalAnimationCollection#animationAdded} event for each model so, for example, a UI can stay in sync.
+     * This raises the {@link ModelAnimationCollection#animationAdded} event for each model so, for example, a UI can stay in sync.
      * </p>
      * @example
      * model.activeAnimations.addAll({
@@ -36368,7 +35547,7 @@ export class ModelExperimentalAnimationCollection {
      * @param [options.reverse = false] - When <code>true</code>, the animations are played in reverse.
      * @param [options.loop = ModelAnimationLoop.NONE] - Determines if and how the animations are looped.
      * @param [options.animationTime] - If defined, computes the local animation time for all of the animations.
-     * @returns An array of {@link ModelExperimentalAnimation} objects, one for each animation added to the collection.  If there are no glTF animations, the array is empty.
+     * @returns An array of {@link ModelAnimation} objects, one for each animation added to the collection.  If there are no glTF animations, the array is empty.
      */
     addAll(options?: {
         startTime?: JulianDate;
@@ -36378,16 +35557,16 @@ export class ModelExperimentalAnimationCollection {
         multiplier?: number;
         reverse?: boolean;
         loop?: ModelAnimationLoop;
-        animationTime?: ModelExperimentalAnimation.AnimationTimeCallback;
-    }): ModelExperimentalAnimation[];
+        animationTime?: ModelAnimation.AnimationTimeCallback;
+    }): ModelAnimation[];
     /**
      * Removes an animation from the collection.
      * <p>
-     * This raises the {@link ModelExperimentalAnimationCollection#animationRemoved} event so, for example, a UI can stay in sync.
+     * This raises the {@link ModelAnimationCollection#animationRemoved} event so, for example, a UI can stay in sync.
      * </p>
      * <p>
-     * An animation can also be implicitly removed from the collection by setting {@link ModelExperimentalAnimationCollection#removeOnStop} to
-     * <code>true</code>.  The {@link ModelExperimentalAnimationCollection#animationRemoved} event is still fired when the animation is removed.
+     * An animation can also be implicitly removed from the collection by setting {@link ModelAnimationCollection#removeOnStop} to
+     * <code>true</code>.  The {@link ModelAnimationCollection#animationRemoved} event is still fired when the animation is removed.
      * </p>
      * @example
      * const a = model.activeAnimations.add({
@@ -36397,11 +35576,11 @@ export class ModelExperimentalAnimationCollection {
      * @param runtimeAnimation - The runtime animation to remove.
      * @returns <code>true</code> if the animation was removed; <code>false</code> if the animation was not found in the collection.
      */
-    remove(runtimeAnimation: ModelExperimentalAnimation): boolean;
+    remove(runtimeAnimation: ModelAnimation): boolean;
     /**
      * Removes all animations from the collection.
      * <p>
-     * This raises the {@link ModelExperimentalAnimationCollection#animationRemoved} event for each
+     * This raises the {@link ModelAnimationCollection#animationRemoved} event for each
      * animation so, for example, a UI can stay in sync.
      * </p>
      */
@@ -36411,7 +35590,7 @@ export class ModelExperimentalAnimationCollection {
      * @param runtimeAnimation - The runtime animation to check for.
      * @returns <code>true</code> if this collection contains the animation, <code>false</code> otherwise.
      */
-    contains(runtimeAnimation: ModelExperimentalAnimation): boolean;
+    contains(runtimeAnimation: ModelAnimation): boolean;
     /**
      * Returns the animation in the collection at the specified index.  Indices are zero-based
      * and increase as animations are added.  Removing an animation shifts all animations after
@@ -36427,56 +35606,11 @@ export class ModelExperimentalAnimationCollection {
      * @param index - The zero-based index of the animation.
      * @returns The runtime animation at the specified index.
      */
-    get(index: number): ModelExperimentalAnimation;
+    get(index: number): ModelAnimation;
 }
 
 /**
- * A model node with a modifiable transform to allow users to define their
- * own animations. While a model's asset can contain animations that target
- * a node's transform, this class allows users to change a node's transform
- * externally. In this way, animation can be driven by another source, not
- * just by the model's asset.
- * <p>
- * Use {@link ModelExperimental#getNode} to get an instance from a loaded model.
- * </p>
- * @example
- * const node = model.getNode("Hand");
- * node.matrix = Cesium.Matrix4.fromScale(new Cesium.Cartesian3(5.0, 1.0, 1.0), node.matrix);
- */
-export class ModelExperimentalNode {
-    /**
-     * The value of the <code>name</code> property of this node.
-     */
-    readonly name: string;
-    /**
-     * The index of the node in the glTF.
-     */
-    readonly id: number;
-    /**
-     * Determines if this node and its children will be shown.
-     */
-    show: boolean;
-    /**
-     * The node's 4x4 matrix transform from its local coordinates to
-     * its parent's. Setting the matrix to undefined will restore the
-     * node's original transform, and allow the node to be animated by
-     * any animations in the model again.
-     * <p>
-     * For changes to take effect, this property must be assigned to;
-     * setting individual elements of the matrix will not work.
-     * </p>
-     */
-    matrix: Matrix4;
-    /**
-     * Gets the node's original 4x4 matrix transform from its local
-     * coordinates to its parent's, without any node transformations
-     * or articulations applied.
-     */
-    originalMatrix: Matrix4;
-}
-
-/**
- * A feature of a {@link ModelExperimental}.
+ * A feature of a {@link Model}.
  * <p>
  * Provides access to a feature's properties stored in the model's feature table.
  * </p>
@@ -36500,7 +35634,7 @@ export class ModelExperimentalNode {
  */
 export class ModelFeature {
     constructor(options: {
-        model: ModelExperimental;
+        model: Model;
         featureId: number;
     });
     /**
@@ -36586,6 +35720,52 @@ export class ModelFeature {
      * @returns <code>true</code> if the property was set, <code>false</code> otherwise.
      */
     setProperty(name: string, value: any): boolean;
+}
+
+/**
+ * A model node with a modifiable transform to allow users to define their
+ * own animations. While a model's asset can contain animations that target
+ * a node's transform, this class allows users to change a node's transform
+ * externally. In this way, animation can be driven by another source, not
+ * just by the model's asset.
+ * <p>
+ * Use {@link Model#getNode} to get an instance from a loaded model.
+ * </p>
+ * @example
+ * const node = model.getNode("Hand");
+ * node.matrix = Cesium.Matrix4.fromScale(new Cesium.Cartesian3(5.0, 1.0, 1.0), node.matrix);
+ */
+export class ModelNode {
+    constructor();
+    /**
+     * The value of the <code>name</code> property of this node.
+     */
+    readonly name: string;
+    /**
+     * The index of the node in the glTF.
+     */
+    readonly id: number;
+    /**
+     * Determines if this node and its children will be shown.
+     */
+    show: boolean;
+    /**
+     * The node's 4x4 matrix transform from its local coordinates to
+     * its parent's. Setting the matrix to undefined will restore the
+     * node's original transform, and allow the node to be animated by
+     * any animations in the model again.
+     * <p>
+     * For changes to take effect, this property must be assigned to;
+     * setting individual elements of the matrix will not work.
+     * </p>
+     */
+    matrix: Matrix4;
+    /**
+     * Gets the node's original 4x4 matrix transform from its local
+     * coordinates to its parent's, without any node transformations
+     * or articulations applied.
+     */
+    originalMatrix: Matrix4;
 }
 
 /**
@@ -36726,108 +35906,21 @@ export enum VaryingType {
 }
 
 /**
- * A model's material with modifiable parameters.  A glTF material
- * contains parameters defined by the material's technique with values
- * defined by the technique and potentially overridden by the material.
- * This class allows changing these values at runtime.
- * <p>
- * Use {@link Model#getMaterial} to create an instance.
- * </p>
+ * Determines if and how a glTF animation is looped.
  */
-export class ModelMaterial {
-    constructor();
+export enum ModelAnimationLoop {
     /**
-     * The value of the <code>name</code> property of this material.
+     * Play the animation once; do not loop it.
      */
-    readonly name: string;
+    NONE = 0,
     /**
-     * The index of the material.
+     * Loop the animation playing it from the start immediately after it stops.
      */
-    readonly id: string;
+    REPEAT = 1,
     /**
-     * Assigns a value to a material parameter.  The type for <code>value</code>
-     * depends on the glTF type of the parameter.  It will be a floating-point
-     * number, Cartesian, or matrix.
-     * @example
-     * material.setValue('diffuse', new Cesium.Cartesian4(1.0, 0.0, 0.0, 1.0));  // vec4
-     * material.setValue('shininess', 256.0); // scalar
-     * @param name - The name of the parameter.
-     * @param [value] - The value to assign to the parameter.
+     * Loop the animation.  First, playing it forward, then in reverse, then forward, and so on.
      */
-    setValue(name: string, value?: any): void;
-    /**
-     * Returns the value of the parameter with the given <code>name</code>.  The type of the
-     * returned object depends on the glTF type of the parameter.  It will be a floating-point
-     * number, Cartesian, or matrix.
-     * @param name - The name of the parameter.
-     * @returns The value of the parameter or <code>undefined</code> if the parameter does not exist.
-     */
-    getValue(name: string): any;
-}
-
-/**
- * A model's mesh and its materials.
- * <p>
- * Use {@link Model#getMesh} to create an instance.
- * </p>
- */
-export class ModelMesh {
-    constructor();
-    /**
-     * The value of the <code>name</code> property of this mesh.
-     */
-    readonly name: string;
-    /**
-     * The index of the mesh.
-     */
-    readonly id: string;
-    /**
-     * An array of {@link ModelMaterial} instances indexed by the mesh's
-     * primitive indices.
-     */
-    readonly materials: ModelMaterial[];
-}
-
-/**
- * A model node with a transform for user-defined animations.  A glTF asset can
- * contain animations that target a node's transform.  This class allows
- * changing a node's transform externally so animation can be driven by another
- * source, not just an animation in the glTF asset.
- * <p>
- * Use {@link Model#getNode} to create an instance.
- * </p>
- * @example
- * const node = model.getNode('LOD3sp');
- * node.matrix = Cesium.Matrix4.fromScale(new Cesium.Cartesian3(5.0, 1.0, 1.0), node.matrix);
- */
-export class ModelNode {
-    constructor();
-    /**
-     * The value of the <code>name</code> property of this node.
-     */
-    readonly name: string;
-    /**
-     * The index of the node.
-     */
-    readonly id: string;
-    /**
-     * Determines if this node and its children will be shown.
-     */
-    show: boolean;
-    /**
-     * The node's 4x4 matrix transform from its local coordinates to
-     * its parent's.
-     * <p>
-     * For changes to take effect, this property must be assigned to;
-     * setting individual elements of the matrix will not work.
-     * </p>
-     */
-    matrix: Matrix4;
-    /**
-     * Gets the node's original 4x4 matrix transform from its local coordinates to
-     * its parent's, without any node transformations or articulations applied.
-     */
-    originalMatrix: Matrix4;
+    MIRRORED_REPEAT = 2
 }
 
 /**
@@ -45026,7 +44119,6 @@ declare module "cesium/Source/Core/EllipsoidTangentPlane" { import { EllipsoidTa
 declare module "cesium/Source/Core/EllipsoidTerrainProvider" { import { EllipsoidTerrainProvider } from 'cesium'; export default EllipsoidTerrainProvider; }
 declare module "cesium/Source/Core/Event" { import { Event } from 'cesium'; export default Event; }
 declare module "cesium/Source/Core/EventHelper" { import { EventHelper } from 'cesium'; export default EventHelper; }
-declare module "cesium/Source/Core/ExperimentalFeatures" { import { ExperimentalFeatures } from 'cesium'; export default ExperimentalFeatures; }
 declare module "cesium/Source/Core/FeatureDetection" { import { FeatureDetection } from 'cesium'; export default FeatureDetection; }
 declare module "cesium/Source/Core/FrustumGeometry" { import { FrustumGeometry } from 'cesium'; export default FrustumGeometry; }
 declare module "cesium/Source/Core/FrustumOutlineGeometry" { import { FrustumOutlineGeometry } from 'cesium'; export default FrustumOutlineGeometry; }
@@ -45308,12 +44400,6 @@ declare module "cesium/Source/Scene/MapboxImageryProvider" { import { MapboxImag
 declare module "cesium/Source/Scene/MapboxStyleImageryProvider" { import { MapboxStyleImageryProvider } from 'cesium'; export default MapboxStyleImageryProvider; }
 declare module "cesium/Source/Scene/Material" { import { Material } from 'cesium'; export default Material; }
 declare module "cesium/Source/Scene/MaterialAppearance" { import { MaterialAppearance } from 'cesium'; export default MaterialAppearance; }
-declare module "cesium/Source/Scene/Model" { import { Model } from 'cesium'; export default Model; }
-declare module "cesium/Source/Scene/ModelAnimation" { import { ModelAnimation } from 'cesium'; export default ModelAnimation; }
-declare module "cesium/Source/Scene/ModelAnimationCollection" { import { ModelAnimationCollection } from 'cesium'; export default ModelAnimationCollection; }
-declare module "cesium/Source/Scene/ModelMaterial" { import { ModelMaterial } from 'cesium'; export default ModelMaterial; }
-declare module "cesium/Source/Scene/ModelMesh" { import { ModelMesh } from 'cesium'; export default ModelMesh; }
-declare module "cesium/Source/Scene/ModelNode" { import { ModelNode } from 'cesium'; export default ModelNode; }
 declare module "cesium/Source/Scene/Moon" { import { Moon } from 'cesium'; export default Moon; }
 declare module "cesium/Source/Scene/NeverTileDiscardPolicy" { import { NeverTileDiscardPolicy } from 'cesium'; export default NeverTileDiscardPolicy; }
 declare module "cesium/Source/Scene/OpenStreetMapImageryProvider" { import { OpenStreetMapImageryProvider } from 'cesium'; export default OpenStreetMapImageryProvider; }
@@ -45364,13 +44450,14 @@ declare module "cesium/Source/Widgets/Command" { import { Command } from 'cesium
 declare module "cesium/Source/Widgets/SvgPathBindingHandler" { import { SvgPathBindingHandler } from 'cesium'; export default SvgPathBindingHandler; }
 declare module "cesium/Source/Widgets/ToggleButtonViewModel" { import { ToggleButtonViewModel } from 'cesium'; export default ToggleButtonViewModel; }
 declare module "cesium/Source/Widgets/createCommand" { import { createCommand } from 'cesium'; export default createCommand; }
-declare module "cesium/Source/Scene/ModelExperimental/CustomShader" { import { CustomShader } from 'cesium'; export default CustomShader; }
-declare module "cesium/Source/Scene/ModelExperimental/ModelExperimental" { import { ModelExperimental } from 'cesium'; export default ModelExperimental; }
-declare module "cesium/Source/Scene/ModelExperimental/ModelExperimentalAnimation" { import { ModelExperimentalAnimation } from 'cesium'; export default ModelExperimentalAnimation; }
-declare module "cesium/Source/Scene/ModelExperimental/ModelExperimentalAnimationCollection" { import { ModelExperimentalAnimationCollection } from 'cesium'; export default ModelExperimentalAnimationCollection; }
-declare module "cesium/Source/Scene/ModelExperimental/ModelExperimentalNode" { import { ModelExperimentalNode } from 'cesium'; export default ModelExperimentalNode; }
-declare module "cesium/Source/Scene/ModelExperimental/ModelFeature" { import { ModelFeature } from 'cesium'; export default ModelFeature; }
-declare module "cesium/Source/Scene/ModelExperimental/TextureUniform" { import { TextureUniform } from 'cesium'; export default TextureUniform; }
+declare module "cesium/Source/Scene/GltfPipeline/removeExtension" { import { removeExtension } from 'cesium'; export default removeExtension; }
+declare module "cesium/Source/Scene/Model/CustomShader" { import { CustomShader } from 'cesium'; export default CustomShader; }
+declare module "cesium/Source/Scene/Model/Model" { import { Model } from 'cesium'; export default Model; }
+declare module "cesium/Source/Scene/Model/ModelAnimation" { import { ModelAnimation } from 'cesium'; export default ModelAnimation; }
+declare module "cesium/Source/Scene/Model/ModelAnimationCollection" { import { ModelAnimationCollection } from 'cesium'; export default ModelAnimationCollection; }
+declare module "cesium/Source/Scene/Model/ModelFeature" { import { ModelFeature } from 'cesium'; export default ModelFeature; }
+declare module "cesium/Source/Scene/Model/ModelNode" { import { ModelNode } from 'cesium'; export default ModelNode; }
+declare module "cesium/Source/Scene/Model/TextureUniform" { import { TextureUniform } from 'cesium'; export default TextureUniform; }
 declare module "cesium/Source/Widgets/Animation/Animation" { import { Animation } from 'cesium'; export default Animation; }
 declare module "cesium/Source/Widgets/Animation/AnimationViewModel" { import { AnimationViewModel } from 'cesium'; export default AnimationViewModel; }
 declare module "cesium/Source/Widgets/BaseLayerPicker/BaseLayerPicker" { import { BaseLayerPicker } from 'cesium'; export default BaseLayerPicker; }
