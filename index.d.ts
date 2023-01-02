@@ -854,6 +854,55 @@ export class AxisAlignedBoundingBox {
 }
 
 /**
+ * Computes the barycentric coordinates for a point with respect to a triangle.
+ * @example
+ * // Returns Cartesian3.UNIT_X
+ * const p = new Cesium.Cartesian3(-1.0, 0.0, 0.0);
+ * const b = Cesium.barycentricCoordinates(p,
+ *   new Cesium.Cartesian3(-1.0, 0.0, 0.0),
+ *   new Cesium.Cartesian3( 1.0, 0.0, 0.0),
+ *   new Cesium.Cartesian3( 0.0, 1.0, 1.0));
+ * @param point - The point to test.
+ * @param p0 - The first point of the triangle, corresponding to the barycentric x-axis.
+ * @param p1 - The second point of the triangle, corresponding to the barycentric y-axis.
+ * @param p2 - The third point of the triangle, corresponding to the barycentric z-axis.
+ * @param [result] - The object onto which to store the result.
+ * @returns The modified result parameter or a new Cartesian3 instance if one was not provided. If the triangle is degenerate the function will return undefined.
+ */
+export function barycentricCoordinates(point: Cartesian2 | Cartesian3, p0: Cartesian2 | Cartesian3, p1: Cartesian2 | Cartesian3, p2: Cartesian2 | Cartesian3, result?: Cartesian3): Cartesian3 | undefined;
+
+/**
+ * Finds an item in a sorted array.
+ * @example
+ * // Create a comparator function to search through an array of numbers.
+ * function comparator(a, b) {
+ *     return a - b;
+ * };
+ * const numbers = [0, 2, 4, 6, 8];
+ * const index = Cesium.binarySearch(numbers, 6, comparator); // 3
+ * @param array - The sorted array to search.
+ * @param itemToFind - The item to find in the array.
+ * @param comparator - The function to use to compare the item to
+ *        elements in the array.
+ * @returns The index of <code>itemToFind</code> in the array, if it exists.  If <code>itemToFind</code>
+ *        does not exist, the return value is a negative number which is the bitwise complement (~)
+ *        of the index before which the itemToFind should be inserted in order to maintain the
+ *        sorted order of the array.
+ */
+export function binarySearch(array: any[], itemToFind: any, comparator: binarySearchComparator): number;
+
+/**
+ * A function used to compare two items while performing a binary search.
+ * @example
+ * function compareNumbers(a, b) {
+ *     return a - b;
+ * }
+ * @param a - An item in the array.
+ * @param b - The item being searched for.
+ */
+export type binarySearchComparator = (a: any, b: any) => number;
+
+/**
  * Provides geocoding through Bing Maps.
  * @param options - Object with the following properties:
  * @param options.key - A key to use with the Bing Maps geocoding service
@@ -1467,6 +1516,26 @@ export class BoxOutlineGeometry {
      */
     static createGeometry(boxGeometry: BoxOutlineGeometry): Geometry | undefined;
 }
+
+/**
+ * Given a relative URL under the Cesium base URL, returns an absolute URL.
+ * @example
+ * const viewer = new Cesium.Viewer("cesiumContainer", {
+ *   imageryProvider: new Cesium.TileMapServiceImageryProvider({
+ *   url: Cesium.buildModuleUrl("Assets/Textures/NaturalEarthII"),
+ *   }),
+ *   baseLayerPicker: false,
+ * });
+ * @param relativeUrl - The relative path.
+ * @returns The absolutely URL representation of the provided path.
+ */
+export function buildModuleUrl(relativeUrl: string): string;
+
+/**
+ * A browser-independent function to cancel an animation frame requested using {@link requestAnimationFrame}.
+ * @param requestID - The value returned by {@link requestAnimationFrame}.
+ */
+export function cancelAnimationFrame(requestID: number): void;
 
 /**
  * A 2D Cartesian point.
@@ -3186,6 +3255,14 @@ export enum ClockStep {
 }
 
 /**
+ * Clones an object, returning a new object containing the same properties.
+ * @param object - The object to clone.
+ * @param [deep = false] - If true, all properties will be deep cloned recursively.
+ * @returns The cloned object.
+ */
+export function clone(object: any, deep?: boolean): any;
+
+/**
  * A color, specified using red, green, blue, and alpha values,
  * which range from <code>0</code> (no intensity) to <code>1.0</code> (full intensity).
  * @param [red = 1.0] - The red component.
@@ -4323,6 +4400,35 @@ export class ColorGeometryInstanceAttribute {
 }
 
 /**
+ * Merges two objects, copying their properties onto a new combined object. When two objects have the same
+ * property, the value of the property on the first object is used.  If either object is undefined,
+ * it will be treated as an empty object.
+ * @example
+ * const object1 = {
+ *     propOne : 1,
+ *     propTwo : {
+ *         value1 : 10
+ *     }
+ * }
+ * const object2 = {
+ *     propTwo : 2
+ * }
+ * const final = Cesium.combine(object1, object2);
+ *
+ * // final === {
+ * //     propOne : 1,
+ * //     propTwo : {
+ * //         value1 : 10
+ * //     }
+ * // }
+ * @param [object1] - The first object to merge.
+ * @param [object2] - The second object to merge.
+ * @param [deep = false] - Perform a recursive merge.
+ * @returns The combined object containing all properties from both objects.
+ */
+export function combine(object1?: any, object2?: any, deep?: boolean): any;
+
+/**
  * WebGL component datatypes.  Components are intrinsics,
  * which form attributes, which form vertices.
  */
@@ -4748,6 +4854,37 @@ export class CorridorOutlineGeometry {
 }
 
 /**
+ * Creates a Globally unique identifier (GUID) string.  A GUID is 128 bits long, and can guarantee uniqueness across space and time.
+ * @example
+ * this.guid = Cesium.createGuid();
+ */
+export function createGuid(): string;
+
+/**
+ * Creates a {@link CesiumTerrainProvider} instance for the {@link https://cesium.com/content/#cesium-world-terrain|Cesium World Terrain}.
+ * @example
+ * // Create Cesium World Terrain with default settings
+ * const viewer = new Cesium.Viewer('cesiumContainer', {
+ *     terrainProvider : Cesium.createWorldTerrain();
+ * });
+ * @example
+ * // Create Cesium World Terrain with water and normals.
+ * const viewer1 = new Cesium.Viewer('cesiumContainer', {
+ *     terrainProvider : Cesium.createWorldTerrain({
+ *         requestWaterMask : true,
+ *         requestVertexNormals : true
+ *     });
+ * });
+ * @param [options] - Object with the following properties:
+ * @param [options.requestVertexNormals = false] - Flag that indicates if the client should request additional lighting information from the server if available.
+ * @param [options.requestWaterMask = false] - Flag that indicates if the client should request per tile water masks from the server if available.
+ */
+export function createWorldTerrain(options?: {
+    requestVertexNormals?: boolean;
+    requestWaterMask?: boolean;
+}): CesiumTerrainProvider;
+
+/**
  * A credit contains data pertaining to how to display attributions/credits for certain content on the screen.
  * @example
  * //Create a credit with a tooltip, image and link
@@ -5091,6 +5228,49 @@ export class DefaultProxy extends Proxy {
      */
     getURL(resource: string): string;
 }
+
+/**
+ * Returns the first parameter if not undefined, otherwise the second parameter.
+ * Useful for setting a default value for a parameter.
+ * @example
+ * param = Cesium.defaultValue(param, 'default');
+ * @returns Returns the first parameter if not undefined, otherwise the second parameter.
+ */
+export function defaultValue(a: any, b: any): any;
+
+/**
+ * @example
+ * if (Cesium.defined(positions)) {
+ *      doSomething();
+ * } else {
+ *      doSomethingElse();
+ * }
+ * @param value - The object.
+ * @returns Returns true if the object is defined, returns false otherwise.
+ */
+export function defined(value: any): boolean;
+
+/**
+ * Destroys an object.  Each of the object's functions, including functions in its prototype,
+ * is replaced with a function that throws a {@link DeveloperError}, except for the object's
+ * <code>isDestroyed</code> function, which is set to a function that returns <code>true</code>.
+ * The object's properties are removed with <code>delete</code>.
+ * <br /><br />
+ * This function is used by objects that hold native resources, e.g., WebGL resources, which
+ * need to be explicitly released.  Client code calls an object's <code>destroy</code> function,
+ * which then releases the native resource and calls <code>destroyObject</code> to put itself
+ * in a destroyed state.
+ * @example
+ * // How a texture would destroy itself.
+ * this.destroy = function () {
+ *     _gl.deleteTexture(_texture);
+ *     return Cesium.destroyObject(this);
+ * };
+ * @param object - The object to destroy.
+ * @param [message] - The message to include in the exception that is thrown if
+ *                           a destroyed object's function is called.
+ */
+export function destroyObject(object: any, message?: string): void;
 
 /**
  * Constructs an exception object that is thrown due to a developer error, e.g., invalid argument,
@@ -6365,6 +6545,14 @@ export namespace FeatureDetection {
 }
 
 /**
+ * Formats an error object into a String.  If available, uses name, message, and stack
+ * properties, otherwise, falls back on toString().
+ * @param object - The item to find in the array.
+ * @returns A string containing the formatted error.
+ */
+export function formatError(object: any): string;
+
+/**
  * Describes a frustum at the given the origin and orientation.
  * @param options - Object with the following properties:
  * @param options.frustum - The frustum.
@@ -6503,21 +6691,6 @@ export namespace Fullscreen {
     function exitFullscreen(): void;
 }
 
-/**
- * The type of geocoding to be performed by a {@link GeocoderService}.
- */
-export enum GeocodeType {
-    /**
-     * Perform a search where the input is considered complete.
-     */
-    SEARCH = 0,
-    /**
-     * Perform an auto-complete using partial input, typically
-     * reserved for providing possible results as a user is typing.
-     */
-    AUTOCOMPLETE = 1
-}
-
 export namespace GeocoderService {
     /**
      * @property displayName - The display name for a location
@@ -6540,6 +6713,21 @@ export class GeocoderService {
      * @param [type = GeocodeType.SEARCH] - The type of geocode to perform.
      */
     geocode(query: string, type?: GeocodeType): Promise<GeocoderService.Result[]>;
+}
+
+/**
+ * The type of geocoding to be performed by a {@link GeocoderService}.
+ */
+export enum GeocodeType {
+    /**
+     * Perform a search where the input is considered complete.
+     */
+    SEARCH = 0,
+    /**
+     * Perform an auto-complete using partial input, typically
+     * reserved for providing possible results as a user is typing.
+     */
+    AUTOCOMPLETE = 1
 }
 
 /**
@@ -7229,6 +7417,70 @@ export namespace GeometryPipeline {
      */
     function compressVertices(geometry: Geometry): Geometry;
 }
+
+/**
+ * Given a relative Uri and a base Uri, returns the absolute Uri of the relative Uri.
+ * @example
+ * //absolute Uri will be "https://test.com/awesome.png";
+ * const absoluteUri = Cesium.getAbsoluteUri('awesome.png', 'https://test.com');
+ * @param relative - The relative Uri.
+ * @param [base] - The base Uri.
+ * @returns The absolute Uri of the given relative Uri.
+ */
+export function getAbsoluteUri(relative: string, base?: string): string;
+
+/**
+ * Given a URI, returns the base path of the URI.
+ * @example
+ * // basePath will be "/Gallery/";
+ * const basePath = Cesium.getBaseUri('/Gallery/simple.czml?value=true&example=false');
+ *
+ * // basePath will be "/Gallery/?value=true&example=false";
+ * const basePath = Cesium.getBaseUri('/Gallery/simple.czml?value=true&example=false', true);
+ * @param uri - The Uri.
+ * @param [includeQuery = false] - Whether or not to include the query string and fragment form the uri
+ * @returns The base path of the Uri.
+ */
+export function getBaseUri(uri: string, includeQuery?: boolean): string;
+
+/**
+ * Given a URI, returns the extension of the URI.
+ * @example
+ * //extension will be "czml";
+ * const extension = Cesium.getExtensionFromUri('/Gallery/simple.czml?value=true&example=false');
+ * @param uri - The Uri.
+ * @returns The extension of the Uri.
+ */
+export function getExtensionFromUri(uri: string): string;
+
+/**
+ * Given a URI, returns the last segment of the URI, removing any path or query information.
+ * @example
+ * //fileName will be"simple.czml";
+ * const fileName = Cesium.getFilenameFromUri('/Gallery/simple.czml?value=true&example=false');
+ * @param uri - The Uri.
+ * @returns The last segment of the Uri.
+ */
+export function getFilenameFromUri(uri: string): string;
+
+/**
+ * Extract a pixel array from a loaded image.  Draws the image
+ * into a canvas so it can read the pixels back.
+ * @param image - The image to extract pixels from.
+ * @param width - The width of the image. If not defined, then image.width is assigned.
+ * @param height - The height of the image. If not defined, then image.height is assigned.
+ * @returns The pixels of the image.
+ */
+export function getImagePixels(image: HTMLImageElement | ImageBitmap, width: number, height: number): ImageData;
+
+/**
+ * Gets a timestamp that can be used in measuring the time between events.  Timestamps
+ * are expressed in milliseconds, but it is not specified what the milliseconds are
+ * measured from.  This function uses performance.now() if it is available, or Date.now()
+ * otherwise.
+ * @returns The timestamp in milliseconds since some unspecified reference time.
+ */
+export function getTimestamp(): number;
 
 /**
  * Provides metadata using the Google Earth Enterprise REST API. This is used by the GoogleEarthEnterpriseImageryProvider
@@ -8212,6 +8464,73 @@ export enum Intersect {
 }
 
 /**
+ * Contains functions for operating on 2D triangles.
+ */
+export namespace Intersections2D {
+    /**
+     * Splits a 2D triangle at given axis-aligned threshold value and returns the resulting
+     * polygon on a given side of the threshold.  The resulting polygon may have 0, 1, 2,
+     * 3, or 4 vertices.
+     * @example
+     * const result = Cesium.Intersections2D.clipTriangleAtAxisAlignedThreshold(0.5, false, 0.2, 0.6, 0.4);
+     * // result === [2, 0, -1, 1, 0, 0.25, -1, 1, 2, 0.5]
+     * @param threshold - The threshold coordinate value at which to clip the triangle.
+     * @param keepAbove - true to keep the portion of the triangle above the threshold, or false
+     *                            to keep the portion below.
+     * @param u0 - The coordinate of the first vertex in the triangle, in counter-clockwise order.
+     * @param u1 - The coordinate of the second vertex in the triangle, in counter-clockwise order.
+     * @param u2 - The coordinate of the third vertex in the triangle, in counter-clockwise order.
+     * @param [result] - The array into which to copy the result.  If this parameter is not supplied,
+     *                            a new array is constructed and returned.
+     * @returns The polygon that results after the clip, specified as a list of
+     *                     vertices.  The vertices are specified in counter-clockwise order.
+     *                     Each vertex is either an index from the existing list (identified as
+     *                     a 0, 1, or 2) or -1 indicating a new vertex not in the original triangle.
+     *                     For new vertices, the -1 is followed by three additional numbers: the
+     *                     index of each of the two original vertices forming the line segment that
+     *                     the new vertex lies on, and the fraction of the distance from the first
+     *                     vertex to the second one.
+     */
+    function clipTriangleAtAxisAlignedThreshold(threshold: number, keepAbove: boolean, u0: number, u1: number, u2: number, result?: number[]): number[];
+    /**
+     * Compute the barycentric coordinates of a 2D position within a 2D triangle.
+     * @example
+     * const result = Cesium.Intersections2D.computeBarycentricCoordinates(0.0, 0.0, 0.0, 1.0, -1, -0.5, 1, -0.5);
+     * // result === new Cesium.Cartesian3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0);
+     * @param x - The x coordinate of the position for which to find the barycentric coordinates.
+     * @param y - The y coordinate of the position for which to find the barycentric coordinates.
+     * @param x1 - The x coordinate of the triangle's first vertex.
+     * @param y1 - The y coordinate of the triangle's first vertex.
+     * @param x2 - The x coordinate of the triangle's second vertex.
+     * @param y2 - The y coordinate of the triangle's second vertex.
+     * @param x3 - The x coordinate of the triangle's third vertex.
+     * @param y3 - The y coordinate of the triangle's third vertex.
+     * @param [result] - The instance into to which to copy the result.  If this parameter
+     *                     is undefined, a new instance is created and returned.
+     * @returns The barycentric coordinates of the position within the triangle.
+     */
+    function computeBarycentricCoordinates(x: number, y: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, result?: Cartesian3): Cartesian3;
+    /**
+     * Compute the intersection between 2 line segments
+     * @example
+     * const result = Cesium.Intersections2D.computeLineSegmentLineSegmentIntersection(0.0, 0.0, 0.0, 2.0, -1, 1, 1, 1);
+     * // result === new Cesium.Cartesian2(0.0, 1.0);
+     * @param x00 - The x coordinate of the first line's first vertex.
+     * @param y00 - The y coordinate of the first line's first vertex.
+     * @param x01 - The x coordinate of the first line's second vertex.
+     * @param y01 - The y coordinate of the first line's second vertex.
+     * @param x10 - The x coordinate of the second line's first vertex.
+     * @param y10 - The y coordinate of the second line's first vertex.
+     * @param x11 - The x coordinate of the second line's second vertex.
+     * @param y11 - The y coordinate of the second line's second vertex.
+     * @param [result] - The instance into to which to copy the result. If this parameter
+     *                     is undefined, a new instance is created and returned.
+     * @returns The intersection point, undefined if there is no intersection point or lines are coincident.
+     */
+    function computeLineSegmentLineSegmentIntersection(x00: number, y00: number, x01: number, y01: number, x10: number, y10: number, x11: number, y11: number, result?: Cartesian2): Cartesian2;
+}
+
+/**
  * Functions for computing the intersection between geometries such as rays, planes, triangles, and ellipsoids.
  */
 export namespace IntersectionTests {
@@ -8338,73 +8657,6 @@ export namespace IntersectionTests {
 }
 
 /**
- * Contains functions for operating on 2D triangles.
- */
-export namespace Intersections2D {
-    /**
-     * Splits a 2D triangle at given axis-aligned threshold value and returns the resulting
-     * polygon on a given side of the threshold.  The resulting polygon may have 0, 1, 2,
-     * 3, or 4 vertices.
-     * @example
-     * const result = Cesium.Intersections2D.clipTriangleAtAxisAlignedThreshold(0.5, false, 0.2, 0.6, 0.4);
-     * // result === [2, 0, -1, 1, 0, 0.25, -1, 1, 2, 0.5]
-     * @param threshold - The threshold coordinate value at which to clip the triangle.
-     * @param keepAbove - true to keep the portion of the triangle above the threshold, or false
-     *                            to keep the portion below.
-     * @param u0 - The coordinate of the first vertex in the triangle, in counter-clockwise order.
-     * @param u1 - The coordinate of the second vertex in the triangle, in counter-clockwise order.
-     * @param u2 - The coordinate of the third vertex in the triangle, in counter-clockwise order.
-     * @param [result] - The array into which to copy the result.  If this parameter is not supplied,
-     *                            a new array is constructed and returned.
-     * @returns The polygon that results after the clip, specified as a list of
-     *                     vertices.  The vertices are specified in counter-clockwise order.
-     *                     Each vertex is either an index from the existing list (identified as
-     *                     a 0, 1, or 2) or -1 indicating a new vertex not in the original triangle.
-     *                     For new vertices, the -1 is followed by three additional numbers: the
-     *                     index of each of the two original vertices forming the line segment that
-     *                     the new vertex lies on, and the fraction of the distance from the first
-     *                     vertex to the second one.
-     */
-    function clipTriangleAtAxisAlignedThreshold(threshold: number, keepAbove: boolean, u0: number, u1: number, u2: number, result?: number[]): number[];
-    /**
-     * Compute the barycentric coordinates of a 2D position within a 2D triangle.
-     * @example
-     * const result = Cesium.Intersections2D.computeBarycentricCoordinates(0.0, 0.0, 0.0, 1.0, -1, -0.5, 1, -0.5);
-     * // result === new Cesium.Cartesian3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0);
-     * @param x - The x coordinate of the position for which to find the barycentric coordinates.
-     * @param y - The y coordinate of the position for which to find the barycentric coordinates.
-     * @param x1 - The x coordinate of the triangle's first vertex.
-     * @param y1 - The y coordinate of the triangle's first vertex.
-     * @param x2 - The x coordinate of the triangle's second vertex.
-     * @param y2 - The y coordinate of the triangle's second vertex.
-     * @param x3 - The x coordinate of the triangle's third vertex.
-     * @param y3 - The y coordinate of the triangle's third vertex.
-     * @param [result] - The instance into to which to copy the result.  If this parameter
-     *                     is undefined, a new instance is created and returned.
-     * @returns The barycentric coordinates of the position within the triangle.
-     */
-    function computeBarycentricCoordinates(x: number, y: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, result?: Cartesian3): Cartesian3;
-    /**
-     * Compute the intersection between 2 line segments
-     * @example
-     * const result = Cesium.Intersections2D.computeLineSegmentLineSegmentIntersection(0.0, 0.0, 0.0, 2.0, -1, 1, 1, 1);
-     * // result === new Cesium.Cartesian2(0.0, 1.0);
-     * @param x00 - The x coordinate of the first line's first vertex.
-     * @param y00 - The y coordinate of the first line's first vertex.
-     * @param x01 - The x coordinate of the first line's second vertex.
-     * @param y01 - The y coordinate of the first line's second vertex.
-     * @param x10 - The x coordinate of the second line's first vertex.
-     * @param y10 - The y coordinate of the second line's first vertex.
-     * @param x11 - The x coordinate of the second line's second vertex.
-     * @param y11 - The y coordinate of the second line's second vertex.
-     * @param [result] - The instance into to which to copy the result. If this parameter
-     *                     is undefined, a new instance is created and returned.
-     * @returns The intersection point, undefined if there is no intersection point or lines are coincident.
-     */
-    function computeLineSegmentLineSegmentIntersection(x00: number, y00: number, x01: number, y01: number, x10: number, y10: number, x11: number, y11: number, result?: Cartesian2): Cartesian2;
-}
-
-/**
  * Represents the closed interval [start, stop].
  * @param [start = 0.0] - The beginning of the interval.
  * @param [stop = 0.0] - The end of the interval.
@@ -8528,6 +8780,15 @@ export class IonResource extends Resource {
         skipColorSpaceConversion?: boolean;
     }): Promise<ImageBitmap | HTMLImageElement> | undefined;
 }
+
+/**
+ * Determines if a given date is a leap year.
+ * @example
+ * const leapYear = Cesium.isLeapYear(2000); // true
+ * @param year - The year to be tested.
+ * @returns True if <code>year</code> is a leap year.
+ */
+export function isLeapYear(year: number): boolean;
 
 /**
  * Constants related to ISO8601 support.
@@ -11222,6 +11483,33 @@ export class Matrix4 implements ArrayLike<number> {
 }
 
 /**
+ * A stable merge sort.
+ * @example
+ * // Assume array contains BoundingSpheres in world coordinates.
+ * // Sort them in ascending order of distance from the camera.
+ * const position = camera.positionWC;
+ * Cesium.mergeSort(array, function(a, b, position) {
+ *     return Cesium.BoundingSphere.distanceSquaredTo(b, position) - Cesium.BoundingSphere.distanceSquaredTo(a, position);
+ * }, position);
+ * @param array - The array to sort.
+ * @param comparator - The function to use to compare elements in the array.
+ * @param [userDefinedObject] - Any item to pass as the third parameter to <code>comparator</code>.
+ */
+export function mergeSort(array: any[], comparator: mergeSortComparator, userDefinedObject?: any): void;
+
+/**
+ * A function used to compare two items while performing a merge sort.
+ * @example
+ * function compareNumbers(a, b, userDefinedObject) {
+ *     return a - b;
+ * }
+ * @param a - An item in the array.
+ * @param b - An item in the array.
+ * @param [userDefinedObject] - An object that was passed to {@link mergeSort}.
+ */
+export type mergeSortComparator = (a: any, b: any, userDefinedObject?: any) => number;
+
+/**
  * A spline that linearly interpolates over an array of weight values used by morph targets.
  * @example
  * const times = [ 0.0, 1.5, 3.0, 4.5, 6.0 ];
@@ -11347,6 +11635,21 @@ export class NearFarScalar {
      */
     equals(right?: NearFarScalar): boolean;
 }
+
+/**
+ * Converts an object representing a set of name/value pairs into a query string,
+ * with names and values encoded properly for use in a URL.  Values that are arrays
+ * will produce multiple values with the same name.
+ * @example
+ * const str = Cesium.objectToQuery({
+ *     key1 : 'some value',
+ *     key2 : 'a/b',
+ *     key3 : ['x', 'y']
+ * });
+ * @param obj - The object containing data to encode.
+ * @returns An encoded query string.
+ */
+export function objectToQuery(obj: any): string;
 
 /**
  * Creates an Occluder derived from an object's position and radius, as well as the camera position.
@@ -12598,6 +12901,23 @@ export class PlaneOutlineGeometry {
 }
 
 /**
+ * Determines if a point is inside a triangle.
+ * @example
+ * // Returns true
+ * const p = new Cesium.Cartesian2(0.25, 0.25);
+ * const b = Cesium.pointInsideTriangle(p,
+ *   new Cesium.Cartesian2(0.0, 0.0),
+ *   new Cesium.Cartesian2(1.0, 0.0),
+ *   new Cesium.Cartesian2(0.0, 1.0));
+ * @param point - The point to test.
+ * @param p0 - The first point of the triangle.
+ * @param p1 - The second point of the triangle.
+ * @param p2 - The third point of the triangle.
+ * @returns <code>true</code> if the point is inside the triangle; otherwise, <code>false</code>.
+ */
+export function pointInsideTriangle(point: Cartesian2 | Cartesian3, p0: Cartesian2 | Cartesian3, p1: Cartesian2 | Cartesian3, p2: Cartesian2 | Cartesian3): boolean;
+
+/**
  * A description of a polygon on the ellipsoid. The polygon is defined by a polygon hierarchy. Polygon geometry can be rendered with both {@link Primitive} and {@link GroundPrimitive}.
  * @example
  * // 1. create a polygon from points
@@ -13769,6 +14089,23 @@ export class QuaternionSpline {
 }
 
 /**
+ * Parses a query string into an object, where the keys and values of the object are the
+ * name/value pairs from the query string, decoded. If a name appears multiple times,
+ * the value in the object will be an array of values.
+ * @example
+ * const obj = Cesium.queryToObject('key1=some%20value&key2=a%2Fb&key3=x&key3=y');
+ * // obj will be:
+ * // {
+ * //   key1 : 'some value',
+ * //   key2 : 'a/b',
+ * //   key3 : ['x', 'y']
+ * // }
+ * @param queryString - The query string.
+ * @returns An object containing the parameters parsed from the query string.
+ */
+export function queryToObject(queryString: string): any;
+
+/**
  * A queue that can enqueue items at the end, and dequeue items from the front.
  */
 export class Queue {
@@ -14363,6 +14700,28 @@ export namespace Request {
      */
     type PriorityCallback = () => number;
 }
+
+/**
+ * A browser-independent function to request a new animation frame.  This is used to create
+ * an application's draw loop as shown in the example below.
+ * @example
+ * // Create a draw loop using requestAnimationFrame. The
+ * // tick callback function is called for every animation frame.
+ * function tick() {
+ *   scene.render();
+ *   Cesium.requestAnimationFrame(tick);
+ * }
+ * tick();
+ * @param callback - The function to call when the next frame should be drawn.
+ * @returns An ID that can be passed to {@link cancelAnimationFrame} to cancel the request.
+ */
+export function requestAnimationFrame(callback: requestAnimationFrameCallback): number;
+
+/**
+ * A function that will be called when the next frame should be drawn.
+ * @param timestamp - A timestamp for the frame, in milliseconds.
+ */
+export type requestAnimationFrameCallback = (timestamp: number) => void;
 
 /**
  * An event that is raised when a request encounters an error.
@@ -15366,6 +15725,59 @@ export class RuntimeError extends Error {
     readonly stack: string;
 }
 
+/**
+ * Initiates a terrain height query for an array of {@link Cartographic} positions by
+ * requesting tiles from a terrain provider, sampling, and interpolating.  The interpolation
+ * matches the triangles used to render the terrain at the specified level.  The query
+ * happens asynchronously, so this function returns a promise that is resolved when
+ * the query completes.  Each point height is modified in place.  If a height can not be
+ * determined because no terrain data is available for the specified level at that location,
+ * or another error occurs, the height is set to undefined.  As is typical of the
+ * {@link Cartographic} type, the supplied height is a height above the reference ellipsoid
+ * (such as {@link Ellipsoid.WGS84}) rather than an altitude above mean sea level.  In other
+ * words, it will not necessarily be 0.0 if sampled in the ocean. This function needs the
+ * terrain level of detail as input, if you need to get the altitude of the terrain as precisely
+ * as possible (i.e. with maximum level of detail) use {@link sampleTerrainMostDetailed}.
+ * @example
+ * // Query the terrain height of two Cartographic positions
+ * const terrainProvider = Cesium.createWorldTerrain();
+ * const positions = [
+ *     Cesium.Cartographic.fromDegrees(86.925145, 27.988257),
+ *     Cesium.Cartographic.fromDegrees(87.0, 28.0)
+ * ];
+ * const promise = Cesium.sampleTerrain(terrainProvider, 11, positions);
+ * Promise.resolve(promise).then(function(updatedPositions) {
+ *     // positions[0].height and positions[1].height have been updated.
+ *     // updatedPositions is just a reference to positions.
+ * });
+ * @param terrainProvider - The terrain provider from which to query heights.
+ * @param level - The terrain level-of-detail from which to query terrain heights.
+ * @param positions - The positions to update with terrain heights.
+ * @returns A promise that resolves to the provided list of positions when terrain the query has completed.
+ */
+export function sampleTerrain(terrainProvider: TerrainProvider, level: number, positions: Cartographic[]): Promise<Cartographic[]>;
+
+/**
+ * Initiates a sampleTerrain() request at the maximum available tile level for a terrain dataset.
+ * @example
+ * // Query the terrain height of two Cartographic positions
+ * const terrainProvider = Cesium.createWorldTerrain();
+ * const positions = [
+ *     Cesium.Cartographic.fromDegrees(86.925145, 27.988257),
+ *     Cesium.Cartographic.fromDegrees(87.0, 28.0)
+ * ];
+ * const promise = Cesium.sampleTerrainMostDetailed(terrainProvider, positions);
+ * Promise.resolve(promise).then(function(updatedPositions) {
+ *     // positions[0].height and positions[1].height have been updated.
+ *     // updatedPositions is just a reference to positions.
+ * });
+ * @param terrainProvider - The terrain provider from which to query heights.
+ * @param positions - The positions to update with terrain heights.
+ * @returns A promise that resolves to the provided list of positions when terrain the query has completed.  This
+ *                                     promise will reject if the terrain provider's `availability` property is undefined.
+ */
+export function sampleTerrainMostDetailed(terrainProvider: TerrainProvider, positions: Cartographic[]): Promise<Cartographic[]>;
+
 export namespace ScreenSpaceEventHandler {
     /**
      * An Event that occurs at a single position on screen.
@@ -15959,6 +16371,13 @@ export class SteppedSpline {
      */
     evaluate(time: number, result?: Cartesian3 | Quaternion): number | Cartesian3 | Quaternion;
 }
+
+/**
+ * Subdivides an array into a number of smaller, equal sized arrays.
+ * @param array - The array to divide.
+ * @param numberOfArrays - The number of arrays to divide the provided array into.
+ */
+export function subdivideArray(array: any[], numberOfArrays: number): void;
 
 /**
  * A wrapper around a web worker that allows scheduling tasks for a given worker,
@@ -17221,106 +17640,6 @@ export namespace TrustedServers {
 }
 
 /**
- * A {@link TerrainProvider} that produces terrain geometry by tessellating height maps
- * retrieved from a {@link http://vr-theworld.com/|VT MÄK VR-TheWorld server}.
- * @example
- * const terrainProvider = new Cesium.VRTheWorldTerrainProvider({
- *   url : 'https://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/'
- * });
- * viewer.terrainProvider = terrainProvider;
- * @param options - Object with the following properties:
- * @param options.url - The URL of the VR-TheWorld TileMap.
- * @param [options.ellipsoid = Ellipsoid.WGS84] - The ellipsoid.  If this parameter is not
- *                    specified, the WGS84 ellipsoid is used.
- * @param [options.credit] - A credit for the data source, which is displayed on the canvas.
- */
-export class VRTheWorldTerrainProvider {
-    constructor(options: {
-        url: Resource | string;
-        ellipsoid?: Ellipsoid;
-        credit?: Credit | string;
-    });
-    /**
-     * Gets an event that is raised when the terrain provider encounters an asynchronous error.  By subscribing
-     * to the event, you will be notified of the error and can potentially recover from it.  Event listeners
-     * are passed an instance of {@link TileProviderError}.
-     */
-    readonly errorEvent: Event;
-    /**
-     * Gets the credit to display when this terrain provider is active.  Typically this is used to credit
-     * the source of the terrain.  This function should not be called before {@link VRTheWorldTerrainProvider#ready} returns true.
-     */
-    readonly credit: Credit;
-    /**
-     * Gets the tiling scheme used by this provider.  This function should
-     * not be called before {@link VRTheWorldTerrainProvider#ready} returns true.
-     */
-    readonly tilingScheme: GeographicTilingScheme;
-    /**
-     * Gets a value indicating whether or not the provider is ready for use.
-     */
-    readonly ready: boolean;
-    /**
-     * Gets a promise that resolves to true when the provider is ready for use.
-     */
-    readonly readyPromise: Promise<boolean>;
-    /**
-     * Gets a value indicating whether or not the provider includes a water mask.  The water mask
-     * indicates which areas of the globe are water rather than land, so they can be rendered
-     * as a reflective surface with animated waves.  This function should not be
-     * called before {@link VRTheWorldTerrainProvider#ready} returns true.
-     */
-    readonly hasWaterMask: boolean;
-    /**
-     * Gets a value indicating whether or not the requested tiles include vertex normals.
-     * This function should not be called before {@link VRTheWorldTerrainProvider#ready} returns true.
-     */
-    readonly hasVertexNormals: boolean;
-    /**
-     * Gets an object that can be used to determine availability of terrain from this provider, such as
-     * at points and in rectangles.  This function should not be called before
-     * {@link TerrainProvider#ready} returns true.  This property may be undefined if availability
-     * information is not available.
-     */
-    readonly availability: TileAvailability;
-    /**
-     * Requests the geometry for a given tile.  This function should not be called before
-     * {@link VRTheWorldTerrainProvider#ready} returns true.  The result includes terrain
-     * data and indicates that all child tiles are available.
-     * @param x - The X coordinate of the tile for which to request geometry.
-     * @param y - The Y coordinate of the tile for which to request geometry.
-     * @param level - The level of the tile for which to request geometry.
-     * @param [request] - The request object. Intended for internal use only.
-     * @returns A promise for the requested geometry.  If this method
-     *          returns undefined instead of a promise, it is an indication that too many requests are already
-     *          pending and the request will be retried later.
-     */
-    requestTileGeometry(x: number, y: number, level: number, request?: Request): Promise<TerrainData> | undefined;
-    /**
-     * Gets the maximum geometric error allowed in a tile at a given level.
-     * @param level - The tile level for which to get the maximum geometric error.
-     * @returns The maximum geometric error.
-     */
-    getLevelMaximumGeometricError(level: number): number;
-    /**
-     * Determines whether data for a tile is available to be loaded.
-     * @param x - The X coordinate of the tile for which to request geometry.
-     * @param y - The Y coordinate of the tile for which to request geometry.
-     * @param level - The level of the tile for which to request geometry.
-     * @returns Undefined if not supported, otherwise true or false.
-     */
-    getTileDataAvailable(x: number, y: number, level: number): boolean | undefined;
-    /**
-     * Makes sure we load availability data for a tile
-     * @param x - The X coordinate of the tile for which to request geometry.
-     * @param y - The Y coordinate of the tile for which to request geometry.
-     * @param level - The level of the tile for which to request geometry.
-     * @returns Undefined if nothing need to be loaded or a Promise that resolves when all required tiles are loaded
-     */
-    loadTileDataAvailability(x: number, y: number, level: number): undefined | Promise<void>;
-}
-
-/**
  * A vertex format defines what attributes make up a vertex.  A VertexFormat can be provided
  * to a {@link Geometry} to request that certain properties be computed, e.g., just position,
  * position and normal, etc.
@@ -17505,6 +17824,106 @@ export enum Visibility {
      * Represents that an object is visible in its entirety.
      */
     FULL = 1
+}
+
+/**
+ * A {@link TerrainProvider} that produces terrain geometry by tessellating height maps
+ * retrieved from a {@link http://vr-theworld.com/|VT MÄK VR-TheWorld server}.
+ * @example
+ * const terrainProvider = new Cesium.VRTheWorldTerrainProvider({
+ *   url : 'https://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/'
+ * });
+ * viewer.terrainProvider = terrainProvider;
+ * @param options - Object with the following properties:
+ * @param options.url - The URL of the VR-TheWorld TileMap.
+ * @param [options.ellipsoid = Ellipsoid.WGS84] - The ellipsoid.  If this parameter is not
+ *                    specified, the WGS84 ellipsoid is used.
+ * @param [options.credit] - A credit for the data source, which is displayed on the canvas.
+ */
+export class VRTheWorldTerrainProvider {
+    constructor(options: {
+        url: Resource | string;
+        ellipsoid?: Ellipsoid;
+        credit?: Credit | string;
+    });
+    /**
+     * Gets an event that is raised when the terrain provider encounters an asynchronous error.  By subscribing
+     * to the event, you will be notified of the error and can potentially recover from it.  Event listeners
+     * are passed an instance of {@link TileProviderError}.
+     */
+    readonly errorEvent: Event;
+    /**
+     * Gets the credit to display when this terrain provider is active.  Typically this is used to credit
+     * the source of the terrain.  This function should not be called before {@link VRTheWorldTerrainProvider#ready} returns true.
+     */
+    readonly credit: Credit;
+    /**
+     * Gets the tiling scheme used by this provider.  This function should
+     * not be called before {@link VRTheWorldTerrainProvider#ready} returns true.
+     */
+    readonly tilingScheme: GeographicTilingScheme;
+    /**
+     * Gets a value indicating whether or not the provider is ready for use.
+     */
+    readonly ready: boolean;
+    /**
+     * Gets a promise that resolves to true when the provider is ready for use.
+     */
+    readonly readyPromise: Promise<boolean>;
+    /**
+     * Gets a value indicating whether or not the provider includes a water mask.  The water mask
+     * indicates which areas of the globe are water rather than land, so they can be rendered
+     * as a reflective surface with animated waves.  This function should not be
+     * called before {@link VRTheWorldTerrainProvider#ready} returns true.
+     */
+    readonly hasWaterMask: boolean;
+    /**
+     * Gets a value indicating whether or not the requested tiles include vertex normals.
+     * This function should not be called before {@link VRTheWorldTerrainProvider#ready} returns true.
+     */
+    readonly hasVertexNormals: boolean;
+    /**
+     * Gets an object that can be used to determine availability of terrain from this provider, such as
+     * at points and in rectangles.  This function should not be called before
+     * {@link TerrainProvider#ready} returns true.  This property may be undefined if availability
+     * information is not available.
+     */
+    readonly availability: TileAvailability;
+    /**
+     * Requests the geometry for a given tile.  This function should not be called before
+     * {@link VRTheWorldTerrainProvider#ready} returns true.  The result includes terrain
+     * data and indicates that all child tiles are available.
+     * @param x - The X coordinate of the tile for which to request geometry.
+     * @param y - The Y coordinate of the tile for which to request geometry.
+     * @param level - The level of the tile for which to request geometry.
+     * @param [request] - The request object. Intended for internal use only.
+     * @returns A promise for the requested geometry.  If this method
+     *          returns undefined instead of a promise, it is an indication that too many requests are already
+     *          pending and the request will be retried later.
+     */
+    requestTileGeometry(x: number, y: number, level: number, request?: Request): Promise<TerrainData> | undefined;
+    /**
+     * Gets the maximum geometric error allowed in a tile at a given level.
+     * @param level - The tile level for which to get the maximum geometric error.
+     * @returns The maximum geometric error.
+     */
+    getLevelMaximumGeometricError(level: number): number;
+    /**
+     * Determines whether data for a tile is available to be loaded.
+     * @param x - The X coordinate of the tile for which to request geometry.
+     * @param y - The Y coordinate of the tile for which to request geometry.
+     * @param level - The level of the tile for which to request geometry.
+     * @returns Undefined if not supported, otherwise true or false.
+     */
+    getTileDataAvailable(x: number, y: number, level: number): boolean | undefined;
+    /**
+     * Makes sure we load availability data for a tile
+     * @param x - The X coordinate of the tile for which to request geometry.
+     * @param y - The Y coordinate of the tile for which to request geometry.
+     * @param level - The level of the tile for which to request geometry.
+     * @returns Undefined if nothing need to be loaded or a Promise that resolves when all required tiles are loaded
+     */
+    loadTileDataAvailability(x: number, y: number, level: number): undefined | Promise<void>;
 }
 
 /**
@@ -17864,397 +18283,6 @@ export enum WindingOrder {
      */
     COUNTER_CLOCKWISE = WebGLConstants.CCW
 }
-
-/**
- * Computes the barycentric coordinates for a point with respect to a triangle.
- * @example
- * // Returns Cartesian3.UNIT_X
- * const p = new Cesium.Cartesian3(-1.0, 0.0, 0.0);
- * const b = Cesium.barycentricCoordinates(p,
- *   new Cesium.Cartesian3(-1.0, 0.0, 0.0),
- *   new Cesium.Cartesian3( 1.0, 0.0, 0.0),
- *   new Cesium.Cartesian3( 0.0, 1.0, 1.0));
- * @param point - The point to test.
- * @param p0 - The first point of the triangle, corresponding to the barycentric x-axis.
- * @param p1 - The second point of the triangle, corresponding to the barycentric y-axis.
- * @param p2 - The third point of the triangle, corresponding to the barycentric z-axis.
- * @param [result] - The object onto which to store the result.
- * @returns The modified result parameter or a new Cartesian3 instance if one was not provided. If the triangle is degenerate the function will return undefined.
- */
-export function barycentricCoordinates(point: Cartesian2 | Cartesian3, p0: Cartesian2 | Cartesian3, p1: Cartesian2 | Cartesian3, p2: Cartesian2 | Cartesian3, result?: Cartesian3): Cartesian3 | undefined;
-
-/**
- * Finds an item in a sorted array.
- * @example
- * // Create a comparator function to search through an array of numbers.
- * function comparator(a, b) {
- *     return a - b;
- * };
- * const numbers = [0, 2, 4, 6, 8];
- * const index = Cesium.binarySearch(numbers, 6, comparator); // 3
- * @param array - The sorted array to search.
- * @param itemToFind - The item to find in the array.
- * @param comparator - The function to use to compare the item to
- *        elements in the array.
- * @returns The index of <code>itemToFind</code> in the array, if it exists.  If <code>itemToFind</code>
- *        does not exist, the return value is a negative number which is the bitwise complement (~)
- *        of the index before which the itemToFind should be inserted in order to maintain the
- *        sorted order of the array.
- */
-export function binarySearch(array: any[], itemToFind: any, comparator: binarySearchComparator): number;
-
-/**
- * A function used to compare two items while performing a binary search.
- * @example
- * function compareNumbers(a, b) {
- *     return a - b;
- * }
- * @param a - An item in the array.
- * @param b - The item being searched for.
- */
-export type binarySearchComparator = (a: any, b: any) => number;
-
-/**
- * Given a relative URL under the Cesium base URL, returns an absolute URL.
- * @example
- * const viewer = new Cesium.Viewer("cesiumContainer", {
- *   imageryProvider: new Cesium.TileMapServiceImageryProvider({
- *   url: Cesium.buildModuleUrl("Assets/Textures/NaturalEarthII"),
- *   }),
- *   baseLayerPicker: false,
- * });
- * @param relativeUrl - The relative path.
- * @returns The absolutely URL representation of the provided path.
- */
-export function buildModuleUrl(relativeUrl: string): string;
-
-/**
- * Clones an object, returning a new object containing the same properties.
- * @param object - The object to clone.
- * @param [deep = false] - If true, all properties will be deep cloned recursively.
- * @returns The cloned object.
- */
-export function clone(object: any, deep?: boolean): any;
-
-/**
- * Merges two objects, copying their properties onto a new combined object. When two objects have the same
- * property, the value of the property on the first object is used.  If either object is undefined,
- * it will be treated as an empty object.
- * @example
- * const object1 = {
- *     propOne : 1,
- *     propTwo : {
- *         value1 : 10
- *     }
- * }
- * const object2 = {
- *     propTwo : 2
- * }
- * const final = Cesium.combine(object1, object2);
- *
- * // final === {
- * //     propOne : 1,
- * //     propTwo : {
- * //         value1 : 10
- * //     }
- * // }
- * @param [object1] - The first object to merge.
- * @param [object2] - The second object to merge.
- * @param [deep = false] - Perform a recursive merge.
- * @returns The combined object containing all properties from both objects.
- */
-export function combine(object1?: any, object2?: any, deep?: boolean): any;
-
-/**
- * Creates a Globally unique identifier (GUID) string.  A GUID is 128 bits long, and can guarantee uniqueness across space and time.
- * @example
- * this.guid = Cesium.createGuid();
- */
-export function createGuid(): string;
-
-/**
- * Creates a {@link CesiumTerrainProvider} instance for the {@link https://cesium.com/content/#cesium-world-terrain|Cesium World Terrain}.
- * @example
- * // Create Cesium World Terrain with default settings
- * const viewer = new Cesium.Viewer('cesiumContainer', {
- *     terrainProvider : Cesium.createWorldTerrain();
- * });
- * @example
- * // Create Cesium World Terrain with water and normals.
- * const viewer1 = new Cesium.Viewer('cesiumContainer', {
- *     terrainProvider : Cesium.createWorldTerrain({
- *         requestWaterMask : true,
- *         requestVertexNormals : true
- *     });
- * });
- * @param [options] - Object with the following properties:
- * @param [options.requestVertexNormals = false] - Flag that indicates if the client should request additional lighting information from the server if available.
- * @param [options.requestWaterMask = false] - Flag that indicates if the client should request per tile water masks from the server if available.
- */
-export function createWorldTerrain(options?: {
-    requestVertexNormals?: boolean;
-    requestWaterMask?: boolean;
-}): CesiumTerrainProvider;
-
-/**
- * Returns the first parameter if not undefined, otherwise the second parameter.
- * Useful for setting a default value for a parameter.
- * @example
- * param = Cesium.defaultValue(param, 'default');
- * @returns Returns the first parameter if not undefined, otherwise the second parameter.
- */
-export function defaultValue(a: any, b: any): any;
-
-/**
- * @example
- * if (Cesium.defined(positions)) {
- *      doSomething();
- * } else {
- *      doSomethingElse();
- * }
- * @param value - The object.
- * @returns Returns true if the object is defined, returns false otherwise.
- */
-export function defined(value: any): boolean;
-
-/**
- * Destroys an object.  Each of the object's functions, including functions in its prototype,
- * is replaced with a function that throws a {@link DeveloperError}, except for the object's
- * <code>isDestroyed</code> function, which is set to a function that returns <code>true</code>.
- * The object's properties are removed with <code>delete</code>.
- * <br /><br />
- * This function is used by objects that hold native resources, e.g., WebGL resources, which
- * need to be explicitly released.  Client code calls an object's <code>destroy</code> function,
- * which then releases the native resource and calls <code>destroyObject</code> to put itself
- * in a destroyed state.
- * @example
- * // How a texture would destroy itself.
- * this.destroy = function () {
- *     _gl.deleteTexture(_texture);
- *     return Cesium.destroyObject(this);
- * };
- * @param object - The object to destroy.
- * @param [message] - The message to include in the exception that is thrown if
- *                           a destroyed object's function is called.
- */
-export function destroyObject(object: any, message?: string): void;
-
-/**
- * Formats an error object into a String.  If available, uses name, message, and stack
- * properties, otherwise, falls back on toString().
- * @param object - The item to find in the array.
- * @returns A string containing the formatted error.
- */
-export function formatError(object: any): string;
-
-/**
- * Given a relative Uri and a base Uri, returns the absolute Uri of the relative Uri.
- * @example
- * //absolute Uri will be "https://test.com/awesome.png";
- * const absoluteUri = Cesium.getAbsoluteUri('awesome.png', 'https://test.com');
- * @param relative - The relative Uri.
- * @param [base] - The base Uri.
- * @returns The absolute Uri of the given relative Uri.
- */
-export function getAbsoluteUri(relative: string, base?: string): string;
-
-/**
- * Given a URI, returns the base path of the URI.
- * @example
- * // basePath will be "/Gallery/";
- * const basePath = Cesium.getBaseUri('/Gallery/simple.czml?value=true&example=false');
- *
- * // basePath will be "/Gallery/?value=true&example=false";
- * const basePath = Cesium.getBaseUri('/Gallery/simple.czml?value=true&example=false', true);
- * @param uri - The Uri.
- * @param [includeQuery = false] - Whether or not to include the query string and fragment form the uri
- * @returns The base path of the Uri.
- */
-export function getBaseUri(uri: string, includeQuery?: boolean): string;
-
-/**
- * Given a URI, returns the extension of the URI.
- * @example
- * //extension will be "czml";
- * const extension = Cesium.getExtensionFromUri('/Gallery/simple.czml?value=true&example=false');
- * @param uri - The Uri.
- * @returns The extension of the Uri.
- */
-export function getExtensionFromUri(uri: string): string;
-
-/**
- * Given a URI, returns the last segment of the URI, removing any path or query information.
- * @example
- * //fileName will be"simple.czml";
- * const fileName = Cesium.getFilenameFromUri('/Gallery/simple.czml?value=true&example=false');
- * @param uri - The Uri.
- * @returns The last segment of the Uri.
- */
-export function getFilenameFromUri(uri: string): string;
-
-/**
- * Extract a pixel array from a loaded image.  Draws the image
- * into a canvas so it can read the pixels back.
- * @param image - The image to extract pixels from.
- * @param width - The width of the image. If not defined, then image.width is assigned.
- * @param height - The height of the image. If not defined, then image.height is assigned.
- * @returns The pixels of the image.
- */
-export function getImagePixels(image: HTMLImageElement | ImageBitmap, width: number, height: number): ImageData;
-
-/**
- * Gets a timestamp that can be used in measuring the time between events.  Timestamps
- * are expressed in milliseconds, but it is not specified what the milliseconds are
- * measured from.  This function uses performance.now() if it is available, or Date.now()
- * otherwise.
- * @returns The timestamp in milliseconds since some unspecified reference time.
- */
-export function getTimestamp(): number;
-
-/**
- * Determines if a given date is a leap year.
- * @example
- * const leapYear = Cesium.isLeapYear(2000); // true
- * @param year - The year to be tested.
- * @returns True if <code>year</code> is a leap year.
- */
-export function isLeapYear(year: number): boolean;
-
-/**
- * A stable merge sort.
- * @example
- * // Assume array contains BoundingSpheres in world coordinates.
- * // Sort them in ascending order of distance from the camera.
- * const position = camera.positionWC;
- * Cesium.mergeSort(array, function(a, b, position) {
- *     return Cesium.BoundingSphere.distanceSquaredTo(b, position) - Cesium.BoundingSphere.distanceSquaredTo(a, position);
- * }, position);
- * @param array - The array to sort.
- * @param comparator - The function to use to compare elements in the array.
- * @param [userDefinedObject] - Any item to pass as the third parameter to <code>comparator</code>.
- */
-export function mergeSort(array: any[], comparator: mergeSortComparator, userDefinedObject?: any): void;
-
-/**
- * A function used to compare two items while performing a merge sort.
- * @example
- * function compareNumbers(a, b, userDefinedObject) {
- *     return a - b;
- * }
- * @param a - An item in the array.
- * @param b - An item in the array.
- * @param [userDefinedObject] - An object that was passed to {@link mergeSort}.
- */
-export type mergeSortComparator = (a: any, b: any, userDefinedObject?: any) => number;
-
-/**
- * Converts an object representing a set of name/value pairs into a query string,
- * with names and values encoded properly for use in a URL.  Values that are arrays
- * will produce multiple values with the same name.
- * @example
- * const str = Cesium.objectToQuery({
- *     key1 : 'some value',
- *     key2 : 'a/b',
- *     key3 : ['x', 'y']
- * });
- * @param obj - The object containing data to encode.
- * @returns An encoded query string.
- */
-export function objectToQuery(obj: any): string;
-
-/**
- * Determines if a point is inside a triangle.
- * @example
- * // Returns true
- * const p = new Cesium.Cartesian2(0.25, 0.25);
- * const b = Cesium.pointInsideTriangle(p,
- *   new Cesium.Cartesian2(0.0, 0.0),
- *   new Cesium.Cartesian2(1.0, 0.0),
- *   new Cesium.Cartesian2(0.0, 1.0));
- * @param point - The point to test.
- * @param p0 - The first point of the triangle.
- * @param p1 - The second point of the triangle.
- * @param p2 - The third point of the triangle.
- * @returns <code>true</code> if the point is inside the triangle; otherwise, <code>false</code>.
- */
-export function pointInsideTriangle(point: Cartesian2 | Cartesian3, p0: Cartesian2 | Cartesian3, p1: Cartesian2 | Cartesian3, p2: Cartesian2 | Cartesian3): boolean;
-
-/**
- * Parses a query string into an object, where the keys and values of the object are the
- * name/value pairs from the query string, decoded. If a name appears multiple times,
- * the value in the object will be an array of values.
- * @example
- * const obj = Cesium.queryToObject('key1=some%20value&key2=a%2Fb&key3=x&key3=y');
- * // obj will be:
- * // {
- * //   key1 : 'some value',
- * //   key2 : 'a/b',
- * //   key3 : ['x', 'y']
- * // }
- * @param queryString - The query string.
- * @returns An object containing the parameters parsed from the query string.
- */
-export function queryToObject(queryString: string): any;
-
-/**
- * Initiates a terrain height query for an array of {@link Cartographic} positions by
- * requesting tiles from a terrain provider, sampling, and interpolating.  The interpolation
- * matches the triangles used to render the terrain at the specified level.  The query
- * happens asynchronously, so this function returns a promise that is resolved when
- * the query completes.  Each point height is modified in place.  If a height can not be
- * determined because no terrain data is available for the specified level at that location,
- * or another error occurs, the height is set to undefined.  As is typical of the
- * {@link Cartographic} type, the supplied height is a height above the reference ellipsoid
- * (such as {@link Ellipsoid.WGS84}) rather than an altitude above mean sea level.  In other
- * words, it will not necessarily be 0.0 if sampled in the ocean. This function needs the
- * terrain level of detail as input, if you need to get the altitude of the terrain as precisely
- * as possible (i.e. with maximum level of detail) use {@link sampleTerrainMostDetailed}.
- * @example
- * // Query the terrain height of two Cartographic positions
- * const terrainProvider = Cesium.createWorldTerrain();
- * const positions = [
- *     Cesium.Cartographic.fromDegrees(86.925145, 27.988257),
- *     Cesium.Cartographic.fromDegrees(87.0, 28.0)
- * ];
- * const promise = Cesium.sampleTerrain(terrainProvider, 11, positions);
- * Promise.resolve(promise).then(function(updatedPositions) {
- *     // positions[0].height and positions[1].height have been updated.
- *     // updatedPositions is just a reference to positions.
- * });
- * @param terrainProvider - The terrain provider from which to query heights.
- * @param level - The terrain level-of-detail from which to query terrain heights.
- * @param positions - The positions to update with terrain heights.
- * @returns A promise that resolves to the provided list of positions when terrain the query has completed.
- */
-export function sampleTerrain(terrainProvider: TerrainProvider, level: number, positions: Cartographic[]): Promise<Cartographic[]>;
-
-/**
- * Initiates a sampleTerrain() request at the maximum available tile level for a terrain dataset.
- * @example
- * // Query the terrain height of two Cartographic positions
- * const terrainProvider = Cesium.createWorldTerrain();
- * const positions = [
- *     Cesium.Cartographic.fromDegrees(86.925145, 27.988257),
- *     Cesium.Cartographic.fromDegrees(87.0, 28.0)
- * ];
- * const promise = Cesium.sampleTerrainMostDetailed(terrainProvider, positions);
- * Promise.resolve(promise).then(function(updatedPositions) {
- *     // positions[0].height and positions[1].height have been updated.
- *     // updatedPositions is just a reference to positions.
- * });
- * @param terrainProvider - The terrain provider from which to query heights.
- * @param positions - The positions to update with terrain heights.
- * @returns A promise that resolves to the provided list of positions when terrain the query has completed.  This
- *                                     promise will reject if the terrain provider's `availability` property is undefined.
- */
-export function sampleTerrainMostDetailed(terrainProvider: TerrainProvider, positions: Cartographic[]): Promise<Cartographic[]>;
-
-/**
- * Subdivides an array into a number of smaller, equal sized arrays.
- * @param array - The array to divide.
- * @param numberOfArrays - The number of arrays to divide the provided array into.
- */
-export function subdivideArray(array: any[], numberOfArrays: number): void;
 
 /**
  * Writes the given text into a new canvas.  The canvas will be sized to fit the text.
@@ -20915,6 +20943,76 @@ export class EntityView {
      */
     update(time: JulianDate, boundingSphere?: BoundingSphere): void;
 }
+
+/**
+ * @property kml - The generated KML.
+ * @property externalFiles - An object dictionary of external files
+ */
+export type exportKmlResultKml = {
+    kml: string;
+    externalFiles: {
+        [key: string]: Blob;
+    };
+};
+
+/**
+ * @property kmz - The generated kmz file.
+ */
+export type exportKmlResultKmz = {
+    kmz: Blob;
+};
+
+/**
+ * Exports an EntityCollection as a KML document. Only Point, Billboard, Model, Path, Polygon, Polyline geometries
+ * will be exported. Note that there is not a 1 to 1 mapping of Entity properties to KML Feature properties. For
+ * example, entity properties that are time dynamic but cannot be dynamic in KML are exported with their values at
+ * options.time or the beginning of the EntityCollection's time interval if not specified. For time-dynamic properties
+ * that are supported in KML, we use the samples if it is a {@link SampledProperty} otherwise we sample the value using
+ * the options.sampleDuration. Point, Billboard, Model and Path geometries with time-dynamic positions will be exported
+ * as gx:Track Features. Not all Materials are representable in KML, so for more advanced Materials just the primary
+ * color is used. Canvas objects are exported as PNG images.
+ * @example
+ * Cesium.exportKml({
+ *      entities: entityCollection
+ *  })
+ *   .then(function(result) {
+ *     // The XML string is in result.kml
+ *
+ *     const externalFiles = result.externalFiles
+ *     for(const file in externalFiles) {
+ *       // file is the name of the file used in the KML document as the href
+ *       // externalFiles[file] is a blob with the contents of the file
+ *     }
+ *   });
+ * @param options - An object with the following properties:
+ * @param options.entities - The EntityCollection to export as KML.
+ * @param [options.ellipsoid = Ellipsoid.WGS84] - The ellipsoid for the output file.
+ * @param [options.modelCallback] - A callback that will be called with a {@link ModelGraphics} instance and should return the URI to use in the KML. Required if a model exists in the entity collection.
+ * @param [options.time = entities.computeAvailability().start] - The time value to use to get properties that are not time varying in KML.
+ * @param [options.defaultAvailability = entities.computeAvailability()] - The interval that will be sampled if an entity doesn't have an availability.
+ * @param [options.sampleDuration = 60] - The number of seconds to sample properties that are varying in KML.
+ * @param [options.kmz = false] - If true KML and external files will be compressed into a kmz file.
+ * @returns A promise that resolved to an object containing the KML string and a dictionary of external file blobs, or a kmz file as a blob if options.kmz is true.
+ */
+export function exportKml(options: {
+    entities: EntityCollection;
+    ellipsoid?: Ellipsoid;
+    modelCallback?: exportKmlModelCallback;
+    time?: JulianDate;
+    defaultAvailability?: TimeInterval;
+    sampleDuration?: number;
+    kmz?: boolean;
+}): Promise<exportKmlResultKml | exportKmlResultKmz>;
+
+/**
+ * Since KML does not support glTF models, this callback is required to specify what URL to use for the model in the KML document.
+ * It can also be used to add additional files to the <code>externalFiles</code> object, which is the list of files embedded in the exported KMZ,
+ * or otherwise returned with the KML string when exporting.
+ * @param model - The ModelGraphics instance for an Entity.
+ * @param time - The time that any properties should use to get the value.
+ * @param externalFiles - An object that maps a filename to a Blob or a Promise that resolves to a Blob.
+ */
+export type exportKmlModelCallback = (model: ModelGraphics, time: JulianDate, externalFiles: any) => string;
 
 export namespace GeoJsonDataSource {
     /**
@@ -24876,74 +24974,47 @@ export class WallGraphics {
 }
 
 /**
- * @property kml - The generated KML.
- * @property externalFiles - An object dictionary of external files
+ * Options to control the setting up of a WebGL Context.
+ * <p>
+ * <code>allowTextureFilterAnisotropic</code> defaults to true, which enables
+ * anisotropic texture filtering when the WebGL extension is supported.
+ * Setting this to false will improve performance, but hurt visual quality,
+ * especially for horizon views.
+ * </p>
+ * @property [requestWebGl2 = false] - If true and the browser supports it, use a WebGL 2 rendering context
+ * @property [allowTextureFilterAnisotropic = true] - If true, use anisotropic filtering during texture sampling
+ * @property [webgl] - WebGL options to be passed on to canvas.getContext
+ * @property [getWebGLStub] - A function to create a WebGL stub for testing
  */
-export type exportKmlResultKml = {
-    kml: string;
-    externalFiles: {
-        [key: string]: Blob;
-    };
+export type ContextOptions = {
+    requestWebGl2?: boolean;
+    allowTextureFilterAnisotropic?: boolean;
+    webgl?: WebGLOptions;
+    getWebGLStub?: (...params: any[]) => any;
 };
 
 /**
- * @property kmz - The generated kmz file.
- */
-export type exportKmlResultKmz = {
-    kmz: Blob;
-};
-
-/**
- * Exports an EntityCollection as a KML document. Only Point, Billboard, Model, Path, Polygon, Polyline geometries
- * will be exported. Note that there is not a 1 to 1 mapping of Entity properties to KML Feature properties. For
- * example, entity properties that are time dynamic but cannot be dynamic in KML are exported with their values at
- * options.time or the beginning of the EntityCollection's time interval if not specified. For time-dynamic properties
- * that are supported in KML, we use the samples if it is a {@link SampledProperty} otherwise we sample the value using
- * the options.sampleDuration. Point, Billboard, Model and Path geometries with time-dynamic positions will be exported
- * as gx:Track Features. Not all Materials are representable in KML, so for more advanced Materials just the primary
- * color is used. Canvas objects are exported as PNG images.
- * @example
- * Cesium.exportKml({
- *      entities: entityCollection
- *  })
- *   .then(function(result) {
- *     // The XML string is in result.kml
+ * WebGL options to be passed on to HTMLCanvasElement.getContext().
+ * See {@link https://registry.khronos.org/webgl/specs/latest/1.0/#5.2|WebGLContextAttributes}
+ * but note the modified defaults for 'alpha', 'stencil', and 'powerPreference'
  *
- *     const externalFiles = result.externalFiles
- *     for(const file in externalFiles) {
- *       // file is the name of the file used in the KML document as the href
- *       // externalFiles[file] is a blob with the contents of the file
- *     }
- *   });
- * @param options - An object with the following properties:
- * @param options.entities - The EntityCollection to export as KML.
- * @param [options.ellipsoid = Ellipsoid.WGS84] - The ellipsoid for the output file.
- * @param [options.modelCallback] - A callback that will be called with a {@link ModelGraphics} instance and should return the URI to use in the KML. Required if a model exists in the entity collection.
- * @param [options.time = entities.computeAvailability().start] - The time value to use to get properties that are not time varying in KML.
- * @param [options.defaultAvailability = entities.computeAvailability()] - The interval that will be sampled if an entity doesn't have an availability.
- * @param [options.sampleDuration = 60] - The number of seconds to sample properties that are varying in KML.
- * @param [options.kmz = false] - If true KML and external files will be compressed into a kmz file.
- * @returns A promise that resolved to an object containing the KML string and a dictionary of external file blobs, or a kmz file as a blob if options.kmz is true.
+ * <p>
+ * <code>alpha</code> defaults to false, which can improve performance
+ * compared to the standard WebGL default of true.  If an application needs
+ * to composite Cesium above other HTML elements using alpha-blending, set
+ * <code>alpha</code> to true.
+ * </p>
  */
-export function exportKml(options: {
-    entities: EntityCollection;
-    ellipsoid?: Ellipsoid;
-    modelCallback?: exportKmlModelCallback;
-    time?: JulianDate;
-    defaultAvailability?: TimeInterval;
-    sampleDuration?: number;
-    kmz?: boolean;
-}): Promise<exportKmlResultKml | exportKmlResultKmz>;
-
-/**
- * Since KML does not support glTF models, this callback is required to specify what URL to use for the model in the KML document.
- * It can also be used to add additional files to the <code>externalFiles</code> object, which is the list of files embedded in the exported KMZ,
- * or otherwise returned with the KML string when exporting.
- * @param model - The ModelGraphics instance for an Entity.
- * @param time - The time that any properties should use to get the value.
- * @param externalFiles - An object that maps a filename to a Blob or a Promise that resolves to a Blob.
- */
-export type exportKmlModelCallback = (model: ModelGraphics, time: JulianDate, externalFiles: any) => string;
+export type WebGLOptions = {
+    alpha?: boolean;
+    depth?: boolean;
+    stencil?: boolean;
+    antialias?: boolean;
+    premultipliedAlpha?: boolean;
+    preserveDrawingBuffer?: boolean;
+    powerPreference?: "default" | "low-power" | "high-performance";
+    failIfMajorPerformanceCaveat?: boolean;
+};
 
 /**
  * The data type of a pixel.
@@ -26244,24 +26315,6 @@ export enum BlendFunction {
 }
 
 /**
- * Determines how opaque and translucent parts of billboards, points, and labels are blended with the scene.
- */
-export enum BlendOption {
-    /**
-     * The billboards, points, or labels in the collection are completely opaque.
-     */
-    OPAQUE = 0,
-    /**
-     * The billboards, points, or labels in the collection are completely translucent.
-     */
-    TRANSLUCENT = 1,
-    /**
-     * The billboards, points, or labels in the collection are both opaque and translucent.
-     */
-    OPAQUE_AND_TRANSLUCENT = 2
-}
-
-/**
  * The blending state combines {@link BlendEquation} and {@link BlendFunction} and the
  * <code>enabled</code> flag to define the full blending state for combining source and
  * destination fragments when rendering.
@@ -26286,6 +26339,24 @@ export namespace BlendingState {
      * Blending is enabled using additive blending, <code>source(source.alpha) + destination</code>.
      */
     const ADDITIVE_BLEND: any;
+}
+
+/**
+ * Determines how opaque and translucent parts of billboards, points, and labels are blended with the scene.
+ */
+export enum BlendOption {
+    /**
+     * The billboards, points, or labels in the collection are completely opaque.
+     */
+    OPAQUE = 0,
+    /**
+     * The billboards, points, or labels in the collection are completely translucent.
+     */
+    TRANSLUCENT = 1,
+    /**
+     * The billboards, points, or labels in the collection are both opaque and translucent.
+     */
+    OPAQUE_AND_TRANSLUCENT = 2
 }
 
 /**
@@ -27650,687 +27721,6 @@ export class Cesium3DTilePointFeature {
 }
 
 /**
- * A style that is applied to a {@link Cesium3DTileset}.
- * <p>
- * Evaluates an expression defined using the
- * {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles Styling language}.
- * </p>
- * @example
- * tileset.style = new Cesium.Cesium3DTileStyle({
- *     color : {
- *         conditions : [
- *             ['${Height} >= 100', 'color("purple", 0.5)'],
- *             ['${Height} >= 50', 'color("red")'],
- *             ['true', 'color("blue")']
- *         ]
- *     },
- *     show : '${Height} > 0',
- *     meta : {
- *         description : '"Building id ${id} has height ${Height}."'
- *     }
- * });
- * @example
- * tileset.style = new Cesium.Cesium3DTileStyle({
- *     color : 'vec4(${Temperature})',
- *     pointSize : '${Temperature} * 2.0'
- * });
- * @param [style] - An object defining a style.
- */
-export class Cesium3DTileStyle {
-    constructor(style?: any);
-    /**
-     * Gets the object defining the style using the
-     * {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles Styling language}.
-     */
-    readonly style: any;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>show</code> property. Alternatively a boolean, string, or object defining a show style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return or convert to a <code>Boolean</code>.
-     * </p>
-     * <p>
-     * This expression is applicable to all tile formats.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     show : '(regExp("^Chest").test(${County})) && (${YearBuilt} >= 1970)'
-     * });
-     * style.show.evaluate(feature); // returns true or false depending on the feature's properties
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override show expression with a custom function
-     * style.show = {
-     *     evaluate : function(feature) {
-     *         return true;
-     *     }
-     * };
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override show expression with a boolean
-     * style.show = true;
-     * };
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override show expression with a string
-     * style.show = '${Height} > 0';
-     * };
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override show expression with a condition
-     * style.show = {
-     *     conditions: [
-     *         ['${height} > 2', 'false'],
-     *         ['true', 'true']
-     *     ];
-     * };
-     */
-    show: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>color</code> property. Alternatively a string or object defining a color style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Color</code>.
-     * </p>
-     * <p>
-     * This expression is applicable to all tile formats.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     color : '(${Temperature} > 90) ? color("red") : color("white")'
-     * });
-     * style.color.evaluateColor(feature, result); // returns a Cesium.Color object
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override color expression with a custom function
-     * style.color = {
-     *     evaluateColor : function(feature, result) {
-     *         return Cesium.Color.clone(Cesium.Color.WHITE, result);
-     *     }
-     * };
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override color expression with a string
-     * style.color = 'color("blue")';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override color expression with a condition
-     * style.color = {
-     *     conditions : [
-     *         ['${height} > 2', 'color("cyan")'],
-     *         ['true', 'color("blue")']
-     *     ]
-     * };
-     */
-    color: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>pointSize</code> property. Alternatively a string or object defining a point size style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Number</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile or a Point Cloud tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     pointSize : '(${Temperature} > 90) ? 2.0 : 1.0'
-     * });
-     * style.pointSize.evaluate(feature); // returns a Number
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override pointSize expression with a custom function
-     * style.pointSize = {
-     *     evaluate : function(feature) {
-     *         return 1.0;
-     *     }
-     * };
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override pointSize expression with a number
-     * style.pointSize = 1.0;
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override pointSize expression with a string
-     * style.pointSize = '${height} / 10';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override pointSize expression with a condition
-     * style.pointSize =  {
-     *     conditions : [
-     *         ['${height} > 2', '1.0'],
-     *         ['true', '2.0']
-     *     ]
-     * };
-     */
-    pointSize: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>pointOutlineColor</code> property. Alternatively a string or object defining a color style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Color</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override pointOutlineColor expression with a string
-     * style.pointOutlineColor = 'color("blue")';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override pointOutlineColor expression with a condition
-     * style.pointOutlineColor = {
-     *     conditions : [
-     *         ['${height} > 2', 'color("cyan")'],
-     *         ['true', 'color("blue")']
-     *     ]
-     * };
-     */
-    pointOutlineColor: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>pointOutlineWidth</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Number</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override pointOutlineWidth expression with a string
-     * style.pointOutlineWidth = '5';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override pointOutlineWidth expression with a condition
-     * style.pointOutlineWidth = {
-     *     conditions : [
-     *         ['${height} > 2', '5'],
-     *         ['true', '0']
-     *     ]
-     * };
-     */
-    pointOutlineWidth: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelColor</code> property. Alternatively a string or object defining a color style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Color</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelColor expression with a string
-     * style.labelColor = 'color("blue")';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelColor expression with a condition
-     * style.labelColor = {
-     *     conditions : [
-     *         ['${height} > 2', 'color("cyan")'],
-     *         ['true', 'color("blue")']
-     *     ]
-     * };
-     */
-    labelColor: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelOutlineColor</code> property. Alternatively a string or object defining a color style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Color</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelOutlineColor expression with a string
-     * style.labelOutlineColor = 'color("blue")';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelOutlineColor expression with a condition
-     * style.labelOutlineColor = {
-     *     conditions : [
-     *         ['${height} > 2', 'color("cyan")'],
-     *         ['true', 'color("blue")']
-     *     ]
-     * };
-     */
-    labelOutlineColor: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelOutlineWidth</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Number</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelOutlineWidth expression with a string
-     * style.labelOutlineWidth = '5';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelOutlineWidth expression with a condition
-     * style.labelOutlineWidth = {
-     *     conditions : [
-     *         ['${height} > 2', '5'],
-     *         ['true', '0']
-     *     ]
-     * };
-     */
-    labelOutlineWidth: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>font</code> property. Alternatively a string or object defining a string style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>String</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     font : '(${Temperature} > 90) ? "30px Helvetica" : "24px Helvetica"'
-     * });
-     * style.font.evaluate(feature); // returns a String
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override font expression with a custom function
-     * style.font = {
-     *     evaluate : function(feature) {
-     *         return '24px Helvetica';
-     *     }
-     * };
-     */
-    font: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>label style</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>LabelStyle</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     labelStyle : `(\${Temperature} > 90) ? ${LabelStyle.FILL_AND_OUTLINE} : ${LabelStyle.FILL}`
-     * });
-     * style.labelStyle.evaluate(feature); // returns a LabelStyle
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelStyle expression with a custom function
-     * style.labelStyle = {
-     *     evaluate : function(feature) {
-     *         return LabelStyle.FILL;
-     *     }
-     * };
-     */
-    labelStyle: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelText</code> property. Alternatively a string or object defining a string style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>String</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     labelText : '(${Temperature} > 90) ? ">90" : "<=90"'
-     * });
-     * style.labelText.evaluate(feature); // returns a String
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelText expression with a custom function
-     * style.labelText = {
-     *     evaluate : function(feature) {
-     *         return 'Example label text';
-     *     }
-     * };
-     */
-    labelText: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>backgroundColor</code> property. Alternatively a string or object defining a color style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Color</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override backgroundColor expression with a string
-     * style.backgroundColor = 'color("blue")';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override backgroundColor expression with a condition
-     * style.backgroundColor = {
-     *     conditions : [
-     *         ['${height} > 2', 'color("cyan")'],
-     *         ['true', 'color("blue")']
-     *     ]
-     * };
-     */
-    backgroundColor: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>backgroundPadding</code> property. Alternatively a string or object defining a vec2 style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Cartesian2</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override backgroundPadding expression with a string
-     * style.backgroundPadding = 'vec2(5.0, 7.0)';
-     * style.backgroundPadding.evaluate(feature); // returns a Cartesian2
-     */
-    backgroundPadding: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>backgroundEnabled</code> property. Alternatively a string or object defining a boolean style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Boolean</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override backgroundEnabled expression with a string
-     * style.backgroundEnabled = 'true';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override backgroundEnabled expression with a condition
-     * style.backgroundEnabled = {
-     *     conditions : [
-     *         ['${height} > 2', 'true'],
-     *         ['true', 'false']
-     *     ]
-     * };
-     */
-    backgroundEnabled: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>scaleByDistance</code> property. Alternatively a string or object defining a vec4 style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Cartesian4</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override scaleByDistance expression with a string
-     * style.scaleByDistance = 'vec4(1.5e2, 2.0, 1.5e7, 0.5)';
-     * style.scaleByDistance.evaluate(feature); // returns a Cartesian4
-     */
-    scaleByDistance: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>translucencyByDistance</code> property. Alternatively a string or object defining a vec4 style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Cartesian4</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override translucencyByDistance expression with a string
-     * style.translucencyByDistance = 'vec4(1.5e2, 1.0, 1.5e7, 0.2)';
-     * style.translucencyByDistance.evaluate(feature); // returns a Cartesian4
-     */
-    translucencyByDistance: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>distanceDisplayCondition</code> property. Alternatively a string or object defining a vec2 style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Cartesian2</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override distanceDisplayCondition expression with a string
-     * style.distanceDisplayCondition = 'vec2(0.0, 5.5e6)';
-     * style.distanceDisplayCondition.evaluate(feature); // returns a Cartesian2
-     */
-    distanceDisplayCondition: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>heightOffset</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Number</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override heightOffset expression with a string
-     * style.heightOffset = '2.0';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override heightOffset expression with a condition
-     * style.heightOffset = {
-     *     conditions : [
-     *         ['${height} > 2', '4.0'],
-     *         ['true', '2.0']
-     *     ]
-     * };
-     */
-    heightOffset: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>anchorLineEnabled</code> property. Alternatively a string or object defining a boolean style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Boolean</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override anchorLineEnabled expression with a string
-     * style.anchorLineEnabled = 'true';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override anchorLineEnabled expression with a condition
-     * style.anchorLineEnabled = {
-     *     conditions : [
-     *         ['${height} > 2', 'true'],
-     *         ['true', 'false']
-     *     ]
-     * };
-     */
-    anchorLineEnabled: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>anchorLineColor</code> property. Alternatively a string or object defining a color style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Color</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override anchorLineColor expression with a string
-     * style.anchorLineColor = 'color("blue")';
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override anchorLineColor expression with a condition
-     * style.anchorLineColor = {
-     *     conditions : [
-     *         ['${height} > 2', 'color("cyan")'],
-     *         ['true', 'color("blue")']
-     *     ]
-     * };
-     */
-    anchorLineColor: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>image</code> property. Alternatively a string or object defining a string style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>String</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     image : '(${Temperature} > 90) ? "/url/to/image1" : "/url/to/image2"'
-     * });
-     * style.image.evaluate(feature); // returns a String
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override image expression with a custom function
-     * style.image = {
-     *     evaluate : function(feature) {
-     *         return '/url/to/image';
-     *     }
-     * };
-     */
-    image: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>disableDepthTestDistance</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>Number</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override disableDepthTestDistance expression with a string
-     * style.disableDepthTestDistance = '1000.0';
-     * style.disableDepthTestDistance.evaluate(feature); // returns a Number
-     */
-    disableDepthTestDistance: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>horizontalOrigin</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>HorizontalOrigin</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     horizontalOrigin : HorizontalOrigin.LEFT
-     * });
-     * style.horizontalOrigin.evaluate(feature); // returns a HorizontalOrigin
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override horizontalOrigin expression with a custom function
-     * style.horizontalOrigin = {
-     *     evaluate : function(feature) {
-     *         return HorizontalOrigin.CENTER;
-     *     }
-     * };
-     */
-    horizontalOrigin: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>verticalOrigin</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>VerticalOrigin</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     verticalOrigin : VerticalOrigin.TOP
-     * });
-     * style.verticalOrigin.evaluate(feature); // returns a VerticalOrigin
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override verticalOrigin expression with a custom function
-     * style.verticalOrigin = {
-     *     evaluate : function(feature) {
-     *         return VerticalOrigin.CENTER;
-     *     }
-     * };
-     */
-    verticalOrigin: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelHorizontalOrigin</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>HorizontalOrigin</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     labelHorizontalOrigin : HorizontalOrigin.LEFT
-     * });
-     * style.labelHorizontalOrigin.evaluate(feature); // returns a HorizontalOrigin
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelHorizontalOrigin expression with a custom function
-     * style.labelHorizontalOrigin = {
-     *     evaluate : function(feature) {
-     *         return HorizontalOrigin.CENTER;
-     *     }
-     * };
-     */
-    labelHorizontalOrigin: StyleExpression;
-    /**
-     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelVerticalOrigin</code> property. Alternatively a string or object defining a number style can be used.
-     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
-     * <p>
-     * The expression must return a <code>VerticalOrigin</code>.
-     * </p>
-     * <p>
-     * This expression is only applicable to point features in a Vector tile.
-     * </p>
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     labelVerticalOrigin : VerticalOrigin.TOP
-     * });
-     * style.labelVerticalOrigin.evaluate(feature); // returns a VerticalOrigin
-     * @example
-     * const style = new Cesium.Cesium3DTileStyle();
-     * // Override labelVerticalOrigin expression with a custom function
-     * style.labelVerticalOrigin = {
-     *     evaluate : function(feature) {
-     *         return VerticalOrigin.CENTER;
-     *     }
-     * };
-     */
-    labelVerticalOrigin: StyleExpression;
-    /**
-     * Gets or sets the object containing application-specific expression that can be explicitly
-     * evaluated, e.g., for display in a UI.
-     * @example
-     * const style = new Cesium3DTileStyle({
-     *     meta : {
-     *         description : '"Building id ${id} has height ${Height}."'
-     *     }
-     * });
-     * style.meta.description.evaluate(feature); // returns a String with the substituted variables
-     */
-    meta: StyleExpression;
-}
-
-/**
  * A {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification|3D Tiles tileset},
  * used for streaming massive heterogeneous 3D geospatial datasets.
  * @example
@@ -29209,6 +28599,687 @@ export namespace Cesium3DTileset {
 }
 
 /**
+ * A style that is applied to a {@link Cesium3DTileset}.
+ * <p>
+ * Evaluates an expression defined using the
+ * {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles Styling language}.
+ * </p>
+ * @example
+ * tileset.style = new Cesium.Cesium3DTileStyle({
+ *     color : {
+ *         conditions : [
+ *             ['${Height} >= 100', 'color("purple", 0.5)'],
+ *             ['${Height} >= 50', 'color("red")'],
+ *             ['true', 'color("blue")']
+ *         ]
+ *     },
+ *     show : '${Height} > 0',
+ *     meta : {
+ *         description : '"Building id ${id} has height ${Height}."'
+ *     }
+ * });
+ * @example
+ * tileset.style = new Cesium.Cesium3DTileStyle({
+ *     color : 'vec4(${Temperature})',
+ *     pointSize : '${Temperature} * 2.0'
+ * });
+ * @param [style] - An object defining a style.
+ */
+export class Cesium3DTileStyle {
+    constructor(style?: any);
+    /**
+     * Gets the object defining the style using the
+     * {@link https://github.com/CesiumGS/3d-tiles/tree/main/specification/Styling|3D Tiles Styling language}.
+     */
+    readonly style: any;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>show</code> property. Alternatively a boolean, string, or object defining a show style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return or convert to a <code>Boolean</code>.
+     * </p>
+     * <p>
+     * This expression is applicable to all tile formats.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     show : '(regExp("^Chest").test(${County})) && (${YearBuilt} >= 1970)'
+     * });
+     * style.show.evaluate(feature); // returns true or false depending on the feature's properties
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override show expression with a custom function
+     * style.show = {
+     *     evaluate : function(feature) {
+     *         return true;
+     *     }
+     * };
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override show expression with a boolean
+     * style.show = true;
+     * };
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override show expression with a string
+     * style.show = '${Height} > 0';
+     * };
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override show expression with a condition
+     * style.show = {
+     *     conditions: [
+     *         ['${height} > 2', 'false'],
+     *         ['true', 'true']
+     *     ];
+     * };
+     */
+    show: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>color</code> property. Alternatively a string or object defining a color style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Color</code>.
+     * </p>
+     * <p>
+     * This expression is applicable to all tile formats.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     color : '(${Temperature} > 90) ? color("red") : color("white")'
+     * });
+     * style.color.evaluateColor(feature, result); // returns a Cesium.Color object
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override color expression with a custom function
+     * style.color = {
+     *     evaluateColor : function(feature, result) {
+     *         return Cesium.Color.clone(Cesium.Color.WHITE, result);
+     *     }
+     * };
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override color expression with a string
+     * style.color = 'color("blue")';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override color expression with a condition
+     * style.color = {
+     *     conditions : [
+     *         ['${height} > 2', 'color("cyan")'],
+     *         ['true', 'color("blue")']
+     *     ]
+     * };
+     */
+    color: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>pointSize</code> property. Alternatively a string or object defining a point size style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Number</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile or a Point Cloud tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     pointSize : '(${Temperature} > 90) ? 2.0 : 1.0'
+     * });
+     * style.pointSize.evaluate(feature); // returns a Number
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override pointSize expression with a custom function
+     * style.pointSize = {
+     *     evaluate : function(feature) {
+     *         return 1.0;
+     *     }
+     * };
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override pointSize expression with a number
+     * style.pointSize = 1.0;
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override pointSize expression with a string
+     * style.pointSize = '${height} / 10';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override pointSize expression with a condition
+     * style.pointSize =  {
+     *     conditions : [
+     *         ['${height} > 2', '1.0'],
+     *         ['true', '2.0']
+     *     ]
+     * };
+     */
+    pointSize: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>pointOutlineColor</code> property. Alternatively a string or object defining a color style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Color</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override pointOutlineColor expression with a string
+     * style.pointOutlineColor = 'color("blue")';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override pointOutlineColor expression with a condition
+     * style.pointOutlineColor = {
+     *     conditions : [
+     *         ['${height} > 2', 'color("cyan")'],
+     *         ['true', 'color("blue")']
+     *     ]
+     * };
+     */
+    pointOutlineColor: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>pointOutlineWidth</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Number</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override pointOutlineWidth expression with a string
+     * style.pointOutlineWidth = '5';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override pointOutlineWidth expression with a condition
+     * style.pointOutlineWidth = {
+     *     conditions : [
+     *         ['${height} > 2', '5'],
+     *         ['true', '0']
+     *     ]
+     * };
+     */
+    pointOutlineWidth: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelColor</code> property. Alternatively a string or object defining a color style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Color</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelColor expression with a string
+     * style.labelColor = 'color("blue")';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelColor expression with a condition
+     * style.labelColor = {
+     *     conditions : [
+     *         ['${height} > 2', 'color("cyan")'],
+     *         ['true', 'color("blue")']
+     *     ]
+     * };
+     */
+    labelColor: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelOutlineColor</code> property. Alternatively a string or object defining a color style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Color</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelOutlineColor expression with a string
+     * style.labelOutlineColor = 'color("blue")';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelOutlineColor expression with a condition
+     * style.labelOutlineColor = {
+     *     conditions : [
+     *         ['${height} > 2', 'color("cyan")'],
+     *         ['true', 'color("blue")']
+     *     ]
+     * };
+     */
+    labelOutlineColor: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelOutlineWidth</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Number</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelOutlineWidth expression with a string
+     * style.labelOutlineWidth = '5';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelOutlineWidth expression with a condition
+     * style.labelOutlineWidth = {
+     *     conditions : [
+     *         ['${height} > 2', '5'],
+     *         ['true', '0']
+     *     ]
+     * };
+     */
+    labelOutlineWidth: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>font</code> property. Alternatively a string or object defining a string style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>String</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     font : '(${Temperature} > 90) ? "30px Helvetica" : "24px Helvetica"'
+     * });
+     * style.font.evaluate(feature); // returns a String
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override font expression with a custom function
+     * style.font = {
+     *     evaluate : function(feature) {
+     *         return '24px Helvetica';
+     *     }
+     * };
+     */
+    font: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>label style</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>LabelStyle</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     labelStyle : `(\${Temperature} > 90) ? ${LabelStyle.FILL_AND_OUTLINE} : ${LabelStyle.FILL}`
+     * });
+     * style.labelStyle.evaluate(feature); // returns a LabelStyle
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelStyle expression with a custom function
+     * style.labelStyle = {
+     *     evaluate : function(feature) {
+     *         return LabelStyle.FILL;
+     *     }
+     * };
+     */
+    labelStyle: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelText</code> property. Alternatively a string or object defining a string style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>String</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     labelText : '(${Temperature} > 90) ? ">90" : "<=90"'
+     * });
+     * style.labelText.evaluate(feature); // returns a String
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelText expression with a custom function
+     * style.labelText = {
+     *     evaluate : function(feature) {
+     *         return 'Example label text';
+     *     }
+     * };
+     */
+    labelText: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>backgroundColor</code> property. Alternatively a string or object defining a color style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Color</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override backgroundColor expression with a string
+     * style.backgroundColor = 'color("blue")';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override backgroundColor expression with a condition
+     * style.backgroundColor = {
+     *     conditions : [
+     *         ['${height} > 2', 'color("cyan")'],
+     *         ['true', 'color("blue")']
+     *     ]
+     * };
+     */
+    backgroundColor: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>backgroundPadding</code> property. Alternatively a string or object defining a vec2 style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Cartesian2</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override backgroundPadding expression with a string
+     * style.backgroundPadding = 'vec2(5.0, 7.0)';
+     * style.backgroundPadding.evaluate(feature); // returns a Cartesian2
+     */
+    backgroundPadding: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>backgroundEnabled</code> property. Alternatively a string or object defining a boolean style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Boolean</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override backgroundEnabled expression with a string
+     * style.backgroundEnabled = 'true';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override backgroundEnabled expression with a condition
+     * style.backgroundEnabled = {
+     *     conditions : [
+     *         ['${height} > 2', 'true'],
+     *         ['true', 'false']
+     *     ]
+     * };
+     */
+    backgroundEnabled: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>scaleByDistance</code> property. Alternatively a string or object defining a vec4 style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Cartesian4</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override scaleByDistance expression with a string
+     * style.scaleByDistance = 'vec4(1.5e2, 2.0, 1.5e7, 0.5)';
+     * style.scaleByDistance.evaluate(feature); // returns a Cartesian4
+     */
+    scaleByDistance: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>translucencyByDistance</code> property. Alternatively a string or object defining a vec4 style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Cartesian4</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override translucencyByDistance expression with a string
+     * style.translucencyByDistance = 'vec4(1.5e2, 1.0, 1.5e7, 0.2)';
+     * style.translucencyByDistance.evaluate(feature); // returns a Cartesian4
+     */
+    translucencyByDistance: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>distanceDisplayCondition</code> property. Alternatively a string or object defining a vec2 style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Cartesian2</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override distanceDisplayCondition expression with a string
+     * style.distanceDisplayCondition = 'vec2(0.0, 5.5e6)';
+     * style.distanceDisplayCondition.evaluate(feature); // returns a Cartesian2
+     */
+    distanceDisplayCondition: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>heightOffset</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Number</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override heightOffset expression with a string
+     * style.heightOffset = '2.0';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override heightOffset expression with a condition
+     * style.heightOffset = {
+     *     conditions : [
+     *         ['${height} > 2', '4.0'],
+     *         ['true', '2.0']
+     *     ]
+     * };
+     */
+    heightOffset: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>anchorLineEnabled</code> property. Alternatively a string or object defining a boolean style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Boolean</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override anchorLineEnabled expression with a string
+     * style.anchorLineEnabled = 'true';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override anchorLineEnabled expression with a condition
+     * style.anchorLineEnabled = {
+     *     conditions : [
+     *         ['${height} > 2', 'true'],
+     *         ['true', 'false']
+     *     ]
+     * };
+     */
+    anchorLineEnabled: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>anchorLineColor</code> property. Alternatively a string or object defining a color style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Color</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override anchorLineColor expression with a string
+     * style.anchorLineColor = 'color("blue")';
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override anchorLineColor expression with a condition
+     * style.anchorLineColor = {
+     *     conditions : [
+     *         ['${height} > 2', 'color("cyan")'],
+     *         ['true', 'color("blue")']
+     *     ]
+     * };
+     */
+    anchorLineColor: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>image</code> property. Alternatively a string or object defining a string style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>String</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     image : '(${Temperature} > 90) ? "/url/to/image1" : "/url/to/image2"'
+     * });
+     * style.image.evaluate(feature); // returns a String
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override image expression with a custom function
+     * style.image = {
+     *     evaluate : function(feature) {
+     *         return '/url/to/image';
+     *     }
+     * };
+     */
+    image: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>disableDepthTestDistance</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>Number</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override disableDepthTestDistance expression with a string
+     * style.disableDepthTestDistance = '1000.0';
+     * style.disableDepthTestDistance.evaluate(feature); // returns a Number
+     */
+    disableDepthTestDistance: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>horizontalOrigin</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>HorizontalOrigin</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     horizontalOrigin : HorizontalOrigin.LEFT
+     * });
+     * style.horizontalOrigin.evaluate(feature); // returns a HorizontalOrigin
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override horizontalOrigin expression with a custom function
+     * style.horizontalOrigin = {
+     *     evaluate : function(feature) {
+     *         return HorizontalOrigin.CENTER;
+     *     }
+     * };
+     */
+    horizontalOrigin: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>verticalOrigin</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>VerticalOrigin</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     verticalOrigin : VerticalOrigin.TOP
+     * });
+     * style.verticalOrigin.evaluate(feature); // returns a VerticalOrigin
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override verticalOrigin expression with a custom function
+     * style.verticalOrigin = {
+     *     evaluate : function(feature) {
+     *         return VerticalOrigin.CENTER;
+     *     }
+     * };
+     */
+    verticalOrigin: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelHorizontalOrigin</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>HorizontalOrigin</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     labelHorizontalOrigin : HorizontalOrigin.LEFT
+     * });
+     * style.labelHorizontalOrigin.evaluate(feature); // returns a HorizontalOrigin
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelHorizontalOrigin expression with a custom function
+     * style.labelHorizontalOrigin = {
+     *     evaluate : function(feature) {
+     *         return HorizontalOrigin.CENTER;
+     *     }
+     * };
+     */
+    labelHorizontalOrigin: StyleExpression;
+    /**
+     * Gets or sets the {@link StyleExpression} object used to evaluate the style's <code>labelVerticalOrigin</code> property. Alternatively a string or object defining a number style can be used.
+     * The getter will return the internal {@link Expression} or {@link ConditionsExpression}, which may differ from the value provided to the setter.
+     * <p>
+     * The expression must return a <code>VerticalOrigin</code>.
+     * </p>
+     * <p>
+     * This expression is only applicable to point features in a Vector tile.
+     * </p>
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     labelVerticalOrigin : VerticalOrigin.TOP
+     * });
+     * style.labelVerticalOrigin.evaluate(feature); // returns a VerticalOrigin
+     * @example
+     * const style = new Cesium.Cesium3DTileStyle();
+     * // Override labelVerticalOrigin expression with a custom function
+     * style.labelVerticalOrigin = {
+     *     evaluate : function(feature) {
+     *         return VerticalOrigin.CENTER;
+     *     }
+     * };
+     */
+    labelVerticalOrigin: StyleExpression;
+    /**
+     * Gets or sets the object containing application-specific expression that can be explicitly
+     * evaluated, e.g., for display in a UI.
+     * @example
+     * const style = new Cesium3DTileStyle({
+     *     meta : {
+     *         description : '"Building id ${id} has height ${Height}."'
+     *     }
+     * });
+     * style.meta.description.evaluate(feature); // returns a String with the substituted variables
+     */
+    meta: StyleExpression;
+}
+
+/**
  * A ParticleEmitter that emits particles from a circle.
  * Particles will be positioned within a circle and have initial velocities going along the z vector.
  * @param [radius = 1.0] - The radius of the circle in meters.
@@ -29869,6 +29940,149 @@ export class ConditionsExpression {
 export class ConeEmitter {
     constructor(angle?: number);
 }
+
+/**
+ * @property height - The height.
+ * @property color - The color at this height.
+ */
+export type createElevationBandMaterialEntry = {
+    height: number;
+    color: Color;
+};
+
+/**
+ * @property entries - A list of elevation entries. They will automatically be sorted from lowest to highest. If there is only one entry and <code>extendsDownards</code> and <code>extendUpwards</code> are both <code>false</code>, they will both be set to <code>true</code>.
+ * @property [extendDownwards = false] - If <code>true</code>, the band's minimum elevation color will extend infinitely downwards.
+ * @property [extendUpwards = false] - If <code>true</code>, the band's maximum elevation color will extend infinitely upwards.
+ */
+export type createElevationBandMaterialBand = {
+    entries: createElevationBandMaterialEntry[];
+    extendDownwards?: boolean;
+    extendUpwards?: boolean;
+};
+
+/**
+ * Creates a {@link Material} that combines multiple layers of color/gradient bands and maps them to terrain heights.
+ *
+ * The shader does a binary search over all the heights to find out which colors are above and below a given height, and
+ * interpolates between them for the final color. This material supports hundreds of entries relatively cheaply.
+ * @example
+ * scene.globe.material = Cesium.createElevationBandMaterial({
+ *     scene : scene,
+ *     layers : [{
+ *         entries : [{
+ *             height : 4200.0,
+ *             color : new Cesium.Color(0.0, 0.0, 0.0, 1.0)
+ *         }, {
+ *             height : 8848.0,
+ *             color : new Cesium.Color(1.0, 1.0, 1.0, 1.0)
+ *         }],
+ *         extendDownwards : true,
+ *         extendUpwards : true,
+ *     }, {
+ *         entries : [{
+ *             height : 7000.0,
+ *             color : new Cesium.Color(1.0, 0.0, 0.0, 0.5)
+ *         }, {
+ *             height : 7100.0,
+ *             color : new Cesium.Color(1.0, 0.0, 0.0, 0.5)
+ *         }]
+ *     }]
+ * });
+ * @param options - Object with the following properties:
+ * @param options.scene - The scene where the visualization is taking place.
+ * @param options.layers - A list of bands ordered from lowest to highest precedence.
+ * @returns A new {@link Material} instance.
+ */
+export function createElevationBandMaterial(options: {
+    scene: Scene;
+    layers: createElevationBandMaterialBand[];
+}): Material;
+
+/**
+ * Creates a {@link Cesium3DTileset} instance for the
+ * {@link https://cesium.com/content/cesium-osm-buildings/|Cesium OSM Buildings}
+ * tileset.
+ * @example
+ * // Create Cesium OSM Buildings with default styling
+ * const viewer = new Cesium.Viewer('cesiumContainer');
+ * viewer.scene.primitives.add(Cesium.createOsmBuildings());
+ * @example
+ * // Create Cesium OSM Buildings with a custom style highlighting
+ * // schools and hospitals.
+ * viewer.scene.primitives.add(Cesium.createOsmBuildings({
+ *   style: new Cesium.Cesium3DTileStyle({
+ *     color: {
+ *       conditions: [
+ *         ["${feature['building']} === 'hospital'", "color('#0000FF')"],
+ *         ["${feature['building']} === 'school'", "color('#00FF00')"],
+ *         [true, "color('#ffffff')"]
+ *       ]
+ *     }
+ *   })
+ * }));
+ * @param [options] - Construction options. Any options allowed by the {@link Cesium3DTileset} constructor
+ *        may be specified here. In addition to those, the following properties are supported:
+ * @param [options.defaultColor = Color.WHITE] - The default color to use for buildings
+ *        that do not have a color. This parameter is ignored if <code>options.style</code> is specified.
+ * @param [options.style] - The style to use with the tileset. If not
+ *        specified, a default style is used which gives each building or building part a
+ *        color inferred from its OpenStreetMap <code>tags</code>. If no color can be inferred,
+ *        <code>options.defaultColor</code> is used.
+ * @param [options.enableShowOutline = true] - If true, enable rendering outlines. This can be set to false to avoid the additional processing of geometry at load time.
+ * @param [options.showOutline = true] - Whether to show outlines around buildings. When true,
+ *        outlines are displayed. When false, outlines are not displayed.
+ */
+export function createOsmBuildings(options?: {
+    defaultColor?: Color;
+    style?: Cesium3DTileStyle;
+    enableShowOutline?: boolean;
+    showOutline?: boolean;
+}): Cesium3DTileset;
+
+/**
+ * Creates a {@link Primitive} to visualize well-known vector vertex attributes:
+ * <code>normal</code>, <code>tangent</code>, and <code>bitangent</code>.  Normal
+ * is red; tangent is green; and bitangent is blue.  If an attribute is not
+ * present, it is not drawn.
+ * @example
+ * scene.primitives.add(Cesium.createTangentSpaceDebugPrimitive({
+ *    geometry : instance.geometry,
+ *    length : 100000.0,
+ *    modelMatrix : instance.modelMatrix
+ * }));
+ * @param options - Object with the following properties:
+ * @param options.geometry - The <code>Geometry</code> instance with the attribute.
+ * @param [options.length = 10000.0] - The length of each line segment in meters.  This can be negative to point the vector in the opposite direction.
+ * @param [options.modelMatrix = Matrix4.IDENTITY] - The model matrix that transforms to transform the geometry from model to world coordinates.
+ * @returns A new <code>Primitive</code> instance with geometry for the vectors.
+ */
+export function createTangentSpaceDebugPrimitive(options: {
+    geometry: Geometry;
+    length?: number;
+    modelMatrix?: Matrix4;
+}): Primitive;
+
+/**
+ * Creates an {@link IonImageryProvider} instance for ion's default global base imagery layer, currently Bing Maps.
+ * @example
+ * // Create Cesium World Terrain with default settings
+ * const viewer = new Cesium.Viewer('cesiumContainer', {
+ *     imageryProvider : Cesium.createWorldImagery();
+ * });
+ * @example
+ * // Create Cesium World Terrain with water and normals.
+ * const viewer = new Cesium.Viewer('cesiumContainer', {
+ *     imageryProvider : Cesium.createWorldImagery({
+ *         style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS
+ *     })
+ * });
+ * @param [options] - Object with the following properties:
+ * @param [options.style = IonWorldImageryStyle] - The style of base imagery, only AERIAL, AERIAL_WITH_LABELS, and ROAD are currently supported.
+ */
+export function createWorldImagery(options?: {
+    style?: IonWorldImageryStyle;
+}): IonImageryProvider;
 
 /**
  * The credit display is responsible for displaying credits on screen.
@@ -33916,20 +34130,6 @@ export class Light {
     intensity: number;
 }
 
-/**
- * Describes how the map will operate in 2D.
- */
-export enum MapMode2D {
-    /**
-     * The 2D map can be rotated about the z axis.
-     */
-    ROTATE = 0,
-    /**
-     * The 2D map can be scrolled infinitely in the horizontal direction.
-     */
-    INFINITE_SCROLL = 1
-}
-
 export namespace MapboxImageryProvider {
     /**
      * Initialization options for the MapboxImageryProvider constructor
@@ -34330,6 +34530,20 @@ export class MapboxStyleImageryProvider {
      *                   It may also be undefined if picking is not supported.
      */
     pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]> | undefined;
+}
+
+/**
+ * Describes how the map will operate in 2D.
+ */
+export enum MapMode2D {
+    /**
+     * The 2D map can be rotated about the z axis.
+     */
+    ROTATE = 0,
+    /**
+     * The 2D map can be scrolled infinitely in the horizontal direction.
+     */
+    INFINITE_SCROLL = 1
 }
 
 /**
@@ -38482,43 +38696,6 @@ export class PrimitiveCollection {
 /**
  * The container for all 3D graphical objects and state in a Cesium virtual scene.  Generally,
  * a scene is not created directly; instead, it is implicitly created by {@link CesiumWidget}.
- * <p>
- * <em><code>contextOptions</code> parameter details:</em>
- * </p>
- * <p>
- * The default values are:
- * <code>
- * {
- *   webgl : {
- *     alpha : false,
- *     depth : true,
- *     stencil : false,
- *     antialias : true,
- *     powerPreference: 'high-performance',
- *     premultipliedAlpha : true,
- *     preserveDrawingBuffer : false,
- *     failIfMajorPerformanceCaveat : false
- *   },
- *   allowTextureFilterAnisotropic : true
- * }
- * </code>
- * </p>
- * <p>
- * The <code>webgl</code> property corresponds to the {@link http://www.khronos.org/registry/webgl/specs/latest/#5.2|WebGLContextAttributes}
- * object used to create the WebGL context.
- * </p>
- * <p>
- * <code>webgl.alpha</code> defaults to false, which can improve performance compared to the standard WebGL default
- * of true.  If an application needs to composite Cesium above other HTML elements using alpha-blending, set
- * <code>webgl.alpha</code> to true.
- * </p>
- * <p>
- * The other <code>webgl</code> properties match the WebGL defaults for {@link http://www.khronos.org/registry/webgl/specs/latest/#5.2|WebGLContextAttributes}.
- * </p>
- * <p>
- * <code>allowTextureFilterAnisotropic</code> defaults to true, which enables anisotropic texture filtering when the
- * WebGL extension is supported.  Setting this to false will improve performance, but hurt visual quality, especially for horizon views.
- * </p>
  * @example
  * // Create scene without anisotropic texture filtering
  * const scene = new Cesium.Scene({
@@ -38529,7 +38706,7 @@ export class PrimitiveCollection {
  * });
  * @param options - Object with the following properties:
  * @param options.canvas - The HTML canvas element to create the scene for.
- * @param [options.contextOptions] - Context and WebGL creation properties.  See details above.
+ * @param [options.contextOptions] - Context and WebGL creation properties.
  * @param [options.creditContainer] - The HTML element in which the credits will be displayed.
  * @param [options.creditViewport] - The HTML element in which to display the credit popup.  If not specified, the viewport will be a added as a sibling of the canvas.
  * @param [options.mapProjection = new GeographicProjection()] - The map projection to use in 2D and Columbus View modes.
@@ -38539,13 +38716,13 @@ export class PrimitiveCollection {
  * @param [options.mapMode2D = MapMode2D.INFINITE_SCROLL] - Determines if the 2D map is rotatable or can be scrolled infinitely in the horizontal direction.
  * @param [options.requestRenderMode = false] - If true, rendering a frame will only occur when needed as determined by changes within the scene. Enabling improves performance of the application, but requires using {@link Scene#requestRender} to render a new frame explicitly in this mode. This will be necessary in many cases after making changes to the scene in other parts of the API. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
  * @param [options.maximumRenderTimeChange = 0.0] - If requestRenderMode is true, this value defines the maximum change in simulation time allowed before a render is requested. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
- * @param [depthPlaneEllipsoidOffset = 0.0] - Adjust the DepthPlane to address rendering artefacts below ellipsoid zero elevation.
+ * @param [options.depthPlaneEllipsoidOffset = 0.0] - Adjust the DepthPlane to address rendering artefacts below ellipsoid zero elevation.
  * @param [options.msaaSamples = 1] - If provided, this value controls the rate of multisample antialiasing. Typical multisampling rates are 2, 4, and sometimes 8 samples per pixel. Higher sampling rates of MSAA may impact performance in exchange for improved visual quality. This value only applies to WebGL2 contexts that support multisample render targets.
  */
 export class Scene {
     constructor(options: {
         canvas: HTMLCanvasElement;
-        contextOptions?: any;
+        contextOptions?: ContextOptions;
         creditContainer?: Element;
         creditViewport?: Element;
         mapProjection?: MapProjection;
@@ -38555,8 +38732,9 @@ export class Scene {
         mapMode2D?: MapMode2D;
         requestRenderMode?: boolean;
         maximumRenderTimeChange?: number;
+        depthPlaneEllipsoidOffset?: number;
         msaaSamples?: number;
-    }, depthPlaneEllipsoidOffset?: number);
+    });
     /**
      * Exceptions occurring in <code>render</code> are always caught in order to raise the
      * <code>renderError</code> event.  If this property is true, the error is rethrown
@@ -38975,7 +39153,7 @@ export class Scene {
     getCompressedTextureFormatSupported(format: string): boolean;
     /**
      * Update and render the scene. It is usually not necessary to call this function
-     * directly because {@link CesiumWidget} or {@link Viewer} do it automatically.
+     * directly because {@link CesiumWidget} will do it automatically.
      * @param [time] - The simulation time at which to render.
      */
     render(time?: JulianDate): void;
@@ -41454,147 +41632,195 @@ export class WebMapTileServiceImageryProvider {
 }
 
 /**
- * @property height - The height.
- * @property color - The color at this height.
- */
-export type createElevationBandMaterialEntry = {
-    height: number;
-    color: Color;
-};
-
-/**
- * @property entries - A list of elevation entries. They will automatically be sorted from lowest to highest. If there is only one entry and <code>extendsDownards</code> and <code>extendUpwards</code> are both <code>false</code>, they will both be set to <code>true</code>.
- * @property [extendDownwards = false] - If <code>true</code>, the band's minimum elevation color will extend infinitely downwards.
- * @property [extendUpwards = false] - If <code>true</code>, the band's maximum elevation color will extend infinitely upwards.
- */
-export type createElevationBandMaterialBand = {
-    entries: createElevationBandMaterialEntry[];
-    extendDownwards?: boolean;
-    extendUpwards?: boolean;
-};
-
-/**
- * Creates a {@link Material} that combines multiple layers of color/gradient bands and maps them to terrain heights.
+ * A widget containing a Cesium scene.
+ * @example
+ * // For each example, include a link to CesiumWidget.css stylesheet in HTML head,
+ * // and in the body, include: <div id="cesiumContainer"></div>
  *
- * The shader does a binary search over all the heights to find out which colors are above and below a given height, and
- * interpolates between them for the final color. This material supports hundreds of entries relatively cheaply.
- * @example
- * scene.globe.material = Cesium.createElevationBandMaterial({
- *     scene : scene,
- *     layers : [{
- *         entries : [{
- *             height : 4200.0,
- *             color : new Cesium.Color(0.0, 0.0, 0.0, 1.0)
- *         }, {
- *             height : 8848.0,
- *             color : new Cesium.Color(1.0, 1.0, 1.0, 1.0)
- *         }],
- *         extendDownwards : true,
- *         extendUpwards : true,
- *     }, {
- *         entries : [{
- *             height : 7000.0,
- *             color : new Cesium.Color(1.0, 0.0, 0.0, 0.5)
- *         }, {
- *             height : 7100.0,
- *             color : new Cesium.Color(1.0, 0.0, 0.0, 0.5)
- *         }]
- *     }]
+ * //Widget with no terrain and default Bing Maps imagery provider.
+ * const widget = new Cesium.CesiumWidget('cesiumContainer');
+ *
+ * //Widget with ion imagery and Cesium World Terrain.
+ * const widget2 = new Cesium.CesiumWidget('cesiumContainer', {
+ *     imageryProvider : Cesium.createWorldImagery(),
+ *     terrainProvider : Cesium.createWorldTerrain(),
+ *     skyBox : new Cesium.SkyBox({
+ *         sources : {
+ *           positiveX : 'stars/TychoSkymapII.t3_08192x04096_80_px.jpg',
+ *           negativeX : 'stars/TychoSkymapII.t3_08192x04096_80_mx.jpg',
+ *           positiveY : 'stars/TychoSkymapII.t3_08192x04096_80_py.jpg',
+ *           negativeY : 'stars/TychoSkymapII.t3_08192x04096_80_my.jpg',
+ *           positiveZ : 'stars/TychoSkymapII.t3_08192x04096_80_pz.jpg',
+ *           negativeZ : 'stars/TychoSkymapII.t3_08192x04096_80_mz.jpg'
+ *         }
+ *     }),
+ *     // Show Columbus View map with Web Mercator projection
+ *     sceneMode : Cesium.SceneMode.COLUMBUS_VIEW,
+ *     mapProjection : new Cesium.WebMercatorProjection()
  * });
- * @param options - Object with the following properties:
- * @param options.scene - The scene where the visualization is taking place.
- * @param options.layers - A list of bands ordered from lowest to highest precedence.
- * @returns A new {@link Material} instance.
- */
-export function createElevationBandMaterial(options: {
-    scene: Scene;
-    layers: createElevationBandMaterialBand[];
-}): Material;
-
-/**
- * Creates a {@link Cesium3DTileset} instance for the
- * {@link https://cesium.com/content/cesium-osm-buildings/|Cesium OSM Buildings}
- * tileset.
- * @example
- * // Create Cesium OSM Buildings with default styling
- * const viewer = new Cesium.Viewer('cesiumContainer');
- * viewer.scene.primitives.add(Cesium.createOsmBuildings());
- * @example
- * // Create Cesium OSM Buildings with a custom style highlighting
- * // schools and hospitals.
- * viewer.scene.primitives.add(Cesium.createOsmBuildings({
- *   style: new Cesium.Cesium3DTileStyle({
- *     color: {
- *       conditions: [
- *         ["${feature['building']} === 'hospital'", "color('#0000FF')"],
- *         ["${feature['building']} === 'school'", "color('#00FF00')"],
- *         [true, "color('#ffffff')"]
- *       ]
- *     }
- *   })
- * }));
- * @param [options] - Construction options. Any options allowed by the {@link Cesium3DTileset} constructor
- *        may be specified here. In addition to those, the following properties are supported:
- * @param [options.defaultColor = Color.WHITE] - The default color to use for buildings
- *        that do not have a color. This parameter is ignored if <code>options.style</code> is specified.
- * @param [options.style] - The style to use with the tileset. If not
- *        specified, a default style is used which gives each building or building part a
- *        color inferred from its OpenStreetMap <code>tags</code>. If no color can be inferred,
- *        <code>options.defaultColor</code> is used.
- * @param [options.enableShowOutline = true] - If true, enable rendering outlines. This can be set to false to avoid the additional processing of geometry at load time.
- * @param [options.showOutline = true] - Whether to show outlines around buildings. When true,
- *        outlines are displayed. When false, outlines are not displayed.
- */
-export function createOsmBuildings(options?: {
-    defaultColor?: Color;
-    style?: Cesium3DTileStyle;
-    enableShowOutline?: boolean;
-    showOutline?: boolean;
-}): Cesium3DTileset;
-
-/**
- * Creates a {@link Primitive} to visualize well-known vector vertex attributes:
- * <code>normal</code>, <code>tangent</code>, and <code>bitangent</code>.  Normal
- * is red; tangent is green; and bitangent is blue.  If an attribute is not
- * present, it is not drawn.
- * @example
- * scene.primitives.add(Cesium.createTangentSpaceDebugPrimitive({
- *    geometry : instance.geometry,
- *    length : 100000.0,
- *    modelMatrix : instance.modelMatrix
- * }));
- * @param options - Object with the following properties:
- * @param options.geometry - The <code>Geometry</code> instance with the attribute.
- * @param [options.length = 10000.0] - The length of each line segment in meters.  This can be negative to point the vector in the opposite direction.
- * @param [options.modelMatrix = Matrix4.IDENTITY] - The model matrix that transforms to transform the geometry from model to world coordinates.
- * @returns A new <code>Primitive</code> instance with geometry for the vectors.
- */
-export function createTangentSpaceDebugPrimitive(options: {
-    geometry: Geometry;
-    length?: number;
-    modelMatrix?: Matrix4;
-}): Primitive;
-
-/**
- * Creates an {@link IonImageryProvider} instance for ion's default global base imagery layer, currently Bing Maps.
- * @example
- * // Create Cesium World Terrain with default settings
- * const viewer = new Cesium.Viewer('cesiumContainer', {
- *     imageryProvider : Cesium.createWorldImagery();
- * });
- * @example
- * // Create Cesium World Terrain with water and normals.
- * const viewer = new Cesium.Viewer('cesiumContainer', {
- *     imageryProvider : Cesium.createWorldImagery({
- *         style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS
- *     })
- * });
+ * @param container - The DOM element or ID that will contain the widget.
  * @param [options] - Object with the following properties:
- * @param [options.style = IonWorldImageryStyle] - The style of base imagery, only AERIAL, AERIAL_WITH_LABELS, and ROAD are currently supported.
+ * @param [options.clock = new Clock()] - The clock to use to control current time.
+ * @param [options.imageryProvider = createWorldImagery()] - The imagery provider to serve as the base layer. If set to <code>false</code>, no imagery provider will be added.
+ * @param [options.terrainProvider = new EllipsoidTerrainProvider] - The terrain provider.
+ * @param [options.skyBox] - The skybox used to render the stars.  When <code>undefined</code>, the default stars are used. If set to <code>false</code>, no skyBox, Sun, or Moon will be added.
+ * @param [options.skyAtmosphere] - Blue sky, and the glow around the Earth's limb.  Set to <code>false</code> to turn it off.
+ * @param [options.sceneMode = SceneMode.SCENE3D] - The initial scene mode.
+ * @param [options.scene3DOnly = false] - When <code>true</code>, each geometry instance will only be rendered in 3D to save GPU memory.
+ * @param [options.orderIndependentTranslucency = true] - If true and the configuration supports it, use order independent translucency.
+ * @param [options.mapProjection = new GeographicProjection()] - The map projection to use in 2D and Columbus View modes.
+ * @param [options.globe = new Globe(mapProjection.ellipsoid)] - The globe to use in the scene.  If set to <code>false</code>, no globe will be added.
+ * @param [options.useDefaultRenderLoop = true] - True if this widget should control the render loop, false otherwise.
+ * @param [options.useBrowserRecommendedResolution = true] - If true, render at the browser's recommended resolution and ignore <code>window.devicePixelRatio</code>.
+ * @param [options.targetFrameRate] - The target frame rate when using the default render loop.
+ * @param [options.showRenderLoopErrors = true] - If true, this widget will automatically display an HTML panel to the user containing the error, if a render loop error occurs.
+ * @param [options.contextOptions] - Context and WebGL creation properties passed to {@link Scene}.
+ * @param [options.creditContainer] - The DOM element or ID that will contain the {@link CreditDisplay}.  If not specified, the credits are added
+ *        to the bottom of the widget itself.
+ * @param [options.creditViewport] - The DOM element or ID that will contain the credit pop up created by the {@link CreditDisplay}.  If not specified, it will appear over the widget itself.
+ * @param [options.shadows = false] - Determines if shadows are cast by light sources.
+ * @param [options.terrainShadows = ShadowMode.RECEIVE_ONLY] - Determines if the terrain casts or receives shadows from light sources.
+ * @param [options.mapMode2D = MapMode2D.INFINITE_SCROLL] - Determines if the 2D map is rotatable or can be scrolled infinitely in the horizontal direction.
+ * @param [options.blurActiveElementOnCanvasFocus = true] - If true, the active element will blur when the viewer's canvas is clicked. Setting this to false is useful for cases when the canvas is clicked only for retrieving position or an entity data without actually meaning to set the canvas to be the active element.
+ * @param [options.requestRenderMode = false] - If true, rendering a frame will only occur when needed as determined by changes within the scene. Enabling improves performance of the application, but requires using {@link Scene#requestRender} to render a new frame explicitly in this mode. This will be necessary in many cases after making changes to the scene in other parts of the API. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
+ * @param [options.maximumRenderTimeChange = 0.0] - If requestRenderMode is true, this value defines the maximum change in simulation time allowed before a render is requested. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
+ * @param [options.msaaSamples = 1] - If provided, this value controls the rate of multisample antialiasing. Typical multisampling rates are 2, 4, and sometimes 8 samples per pixel. Higher sampling rates of MSAA may impact performance in exchange for improved visual quality. This value only applies to WebGL2 contexts that support multisample render targets.
  */
-export function createWorldImagery(options?: {
-    style?: IonWorldImageryStyle;
-}): IonImageryProvider;
+export class CesiumWidget {
+    constructor(container: Element | string, options?: {
+        clock?: Clock;
+        imageryProvider?: ImageryProvider | false;
+        terrainProvider?: TerrainProvider;
+        skyBox?: SkyBox | false;
+        skyAtmosphere?: SkyAtmosphere | false;
+        sceneMode?: SceneMode;
+        scene3DOnly?: boolean;
+        orderIndependentTranslucency?: boolean;
+        mapProjection?: MapProjection;
+        globe?: Globe | false;
+        useDefaultRenderLoop?: boolean;
+        useBrowserRecommendedResolution?: boolean;
+        targetFrameRate?: number;
+        showRenderLoopErrors?: boolean;
+        contextOptions?: ContextOptions;
+        creditContainer?: Element | string;
+        creditViewport?: Element | string;
+        shadows?: boolean;
+        terrainShadows?: ShadowMode;
+        mapMode2D?: MapMode2D;
+        blurActiveElementOnCanvasFocus?: boolean;
+        requestRenderMode?: boolean;
+        maximumRenderTimeChange?: number;
+        msaaSamples?: number;
+    });
+    /**
+     * Gets the parent container.
+     */
+    readonly container: Element;
+    /**
+     * Gets the canvas.
+     */
+    readonly canvas: HTMLCanvasElement;
+    /**
+     * Gets the credit container.
+     */
+    readonly creditContainer: Element;
+    /**
+     * Gets the credit viewport
+     */
+    readonly creditViewport: Element;
+    /**
+     * Gets the scene.
+     */
+    readonly scene: Scene;
+    /**
+     * Gets the collection of image layers that will be rendered on the globe.
+     */
+    readonly imageryLayers: ImageryLayerCollection;
+    /**
+     * The terrain provider providing surface geometry for the globe.
+     */
+    terrainProvider: TerrainProvider;
+    /**
+     * Gets the camera.
+     */
+    readonly camera: Camera;
+    /**
+     * Gets the clock.
+     */
+    readonly clock: Clock;
+    /**
+     * Gets the screen space event handler.
+     */
+    readonly screenSpaceEventHandler: ScreenSpaceEventHandler;
+    /**
+     * Gets or sets the target frame rate of the widget when <code>useDefaultRenderLoop</code>
+     * is true. If undefined, the browser's requestAnimationFrame implementation
+     * determines the frame rate.  If defined, this value must be greater than 0.  A value higher
+     * than the underlying requestAnimationFrame implementation will have no effect.
+     */
+    targetFrameRate: number;
+    /**
+     * Gets or sets whether or not this widget should control the render loop.
+     * If true the widget will use requestAnimationFrame to
+     * perform rendering and resizing of the widget, as well as drive the
+     * simulation clock. If set to false, you must manually call the
+     * <code>resize</code>, <code>render</code> methods as part of a custom
+     * render loop.  If an error occurs during rendering, {@link Scene}'s
+     * <code>renderError</code> event will be raised and this property
+     * will be set to false.  It must be set back to true to continue rendering
+     * after the error.
+     */
+    useDefaultRenderLoop: boolean;
+    /**
+     * Gets or sets a scaling factor for rendering resolution.  Values less than 1.0 can improve
+     * performance on less powerful devices while values greater than 1.0 will render at a higher
+     * resolution and then scale down, resulting in improved visual fidelity.
+     * For example, if the widget is laid out at a size of 640x480, setting this value to 0.5
+     * will cause the scene to be rendered at 320x240 and then scaled up while setting
+     * it to 2.0 will cause the scene to be rendered at 1280x960 and then scaled down.
+     */
+    resolutionScale: number;
+    /**
+     * Boolean flag indicating if the browser's recommended resolution is used.
+     * If true, the browser's device pixel ratio is ignored and 1.0 is used instead,
+     * effectively rendering based on CSS pixels instead of device pixels. This can improve
+     * performance on less powerful devices that have high pixel density. When false, rendering
+     * will be in device pixels. {@link CesiumWidget#resolutionScale} will still take effect whether
+     * this flag is true or false.
+     */
+    useBrowserRecommendedResolution: boolean;
+    /**
+     * Show an error panel to the user containing a title and a longer error message,
+     * which can be dismissed using an OK button.  This panel is displayed automatically
+     * when a render loop error occurs, if showRenderLoopErrors was not false when the
+     * widget was constructed.
+     * @param title - The title to be displayed on the error panel.  This string is interpreted as text.
+     * @param [message] - A helpful, user-facing message to display prior to the detailed error information.  This string is interpreted as HTML.
+     * @param [error] - The error to be displayed on the error panel.  This string is formatted using {@link formatError} and then displayed as text.
+     */
+    showErrorPanel(title: string, message?: string, error?: string): void;
+    /**
+     * @returns true if the object has been destroyed, false otherwise.
+     */
+    isDestroyed(): boolean;
+    /**
+     * Destroys the widget.  Should be called if permanently
+     * removing the widget from layout.
+     */
+    destroy(): void;
+    /**
+     * Updates the canvas size, camera aspect ratio, and viewport size.
+     * This function is called automatically as needed unless
+     * <code>useDefaultRenderLoop</code> is set to false.
+     */
+    resize(): void;
+    /**
+     * Renders the scene.  This function is called automatically
+     * unless <code>useDefaultRenderLoop</code> is set to false;
+     */
+    render(): void;
+}
 
 /**
  * <span style="display: block; text-align: center;">
@@ -42547,197 +42773,6 @@ export class CesiumInspectorViewModel {
 }
 
 /**
- * A widget containing a Cesium scene.
- * @example
- * // For each example, include a link to CesiumWidget.css stylesheet in HTML head,
- * // and in the body, include: <div id="cesiumContainer"></div>
- *
- * //Widget with no terrain and default Bing Maps imagery provider.
- * const widget = new Cesium.CesiumWidget('cesiumContainer');
- *
- * //Widget with ion imagery and Cesium World Terrain.
- * const widget2 = new Cesium.CesiumWidget('cesiumContainer', {
- *     imageryProvider : Cesium.createWorldImagery(),
- *     terrainProvider : Cesium.createWorldTerrain(),
- *     skyBox : new Cesium.SkyBox({
- *         sources : {
- *           positiveX : 'stars/TychoSkymapII.t3_08192x04096_80_px.jpg',
- *           negativeX : 'stars/TychoSkymapII.t3_08192x04096_80_mx.jpg',
- *           positiveY : 'stars/TychoSkymapII.t3_08192x04096_80_py.jpg',
- *           negativeY : 'stars/TychoSkymapII.t3_08192x04096_80_my.jpg',
- *           positiveZ : 'stars/TychoSkymapII.t3_08192x04096_80_pz.jpg',
- *           negativeZ : 'stars/TychoSkymapII.t3_08192x04096_80_mz.jpg'
- *         }
- *     }),
- *     // Show Columbus View map with Web Mercator projection
- *     sceneMode : Cesium.SceneMode.COLUMBUS_VIEW,
- *     mapProjection : new Cesium.WebMercatorProjection()
- * });
- * @param container - The DOM element or ID that will contain the widget.
- * @param [options] - Object with the following properties:
- * @param [options.clock = new Clock()] - The clock to use to control current time.
- * @param [options.imageryProvider = createWorldImagery()] - The imagery provider to serve as the base layer. If set to <code>false</code>, no imagery provider will be added.
- * @param [options.terrainProvider = new EllipsoidTerrainProvider] - The terrain provider.
- * @param [options.skyBox] - The skybox used to render the stars.  When <code>undefined</code>, the default stars are used. If set to <code>false</code>, no skyBox, Sun, or Moon will be added.
- * @param [options.skyAtmosphere] - Blue sky, and the glow around the Earth's limb.  Set to <code>false</code> to turn it off.
- * @param [options.sceneMode = SceneMode.SCENE3D] - The initial scene mode.
- * @param [options.scene3DOnly = false] - When <code>true</code>, each geometry instance will only be rendered in 3D to save GPU memory.
- * @param [options.orderIndependentTranslucency = true] - If true and the configuration supports it, use order independent translucency.
- * @param [options.mapProjection = new GeographicProjection()] - The map projection to use in 2D and Columbus View modes.
- * @param [options.globe = new Globe(mapProjection.ellipsoid)] - The globe to use in the scene.  If set to <code>false</code>, no globe will be added.
- * @param [options.useDefaultRenderLoop = true] - True if this widget should control the render loop, false otherwise.
- * @param [options.useBrowserRecommendedResolution = true] - If true, render at the browser's recommended resolution and ignore <code>window.devicePixelRatio</code>.
- * @param [options.targetFrameRate] - The target frame rate when using the default render loop.
- * @param [options.showRenderLoopErrors = true] - If true, this widget will automatically display an HTML panel to the user containing the error, if a render loop error occurs.
- * @param [options.contextOptions] - Context and WebGL creation properties corresponding to <code>options</code> passed to {@link Scene}.
- * @param [options.creditContainer] - The DOM element or ID that will contain the {@link CreditDisplay}.  If not specified, the credits are added
- *        to the bottom of the widget itself.
- * @param [options.creditViewport] - The DOM element or ID that will contain the credit pop up created by the {@link CreditDisplay}.  If not specified, it will appear over the widget itself.
- * @param [options.shadows = false] - Determines if shadows are cast by light sources.
- * @param [options.terrainShadows = ShadowMode.RECEIVE_ONLY] - Determines if the terrain casts or receives shadows from light sources.
- * @param [options.mapMode2D = MapMode2D.INFINITE_SCROLL] - Determines if the 2D map is rotatable or can be scrolled infinitely in the horizontal direction.
- * @param [options.blurActiveElementOnCanvasFocus = true] - If true, the active element will blur when the viewer's canvas is clicked. Setting this to false is useful for cases when the canvas is clicked only for retrieving position or an entity data without actually meaning to set the canvas to be the active element.
- * @param [options.requestRenderMode = false] - If true, rendering a frame will only occur when needed as determined by changes within the scene. Enabling improves performance of the application, but requires using {@link Scene#requestRender} to render a new frame explicitly in this mode. This will be necessary in many cases after making changes to the scene in other parts of the API. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
- * @param [options.maximumRenderTimeChange = 0.0] - If requestRenderMode is true, this value defines the maximum change in simulation time allowed before a render is requested. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
- * @param [options.msaaSamples = 1] - If provided, this value controls the rate of multisample antialiasing. Typical multisampling rates are 2, 4, and sometimes 8 samples per pixel. Higher sampling rates of MSAA may impact performance in exchange for improved visual quality. This value only applies to WebGL2 contexts that support multisample render targets.
- */
-export class CesiumWidget {
-    constructor(container: Element | string, options?: {
-        clock?: Clock;
-        imageryProvider?: ImageryProvider | false;
-        terrainProvider?: TerrainProvider;
-        skyBox?: SkyBox | false;
-        skyAtmosphere?: SkyAtmosphere | false;
-        sceneMode?: SceneMode;
-        scene3DOnly?: boolean;
-        orderIndependentTranslucency?: boolean;
-        mapProjection?: MapProjection;
-        globe?: Globe | false;
-        useDefaultRenderLoop?: boolean;
-        useBrowserRecommendedResolution?: boolean;
-        targetFrameRate?: number;
-        showRenderLoopErrors?: boolean;
-        contextOptions?: any;
-        creditContainer?: Element | string;
-        creditViewport?: Element | string;
-        shadows?: boolean;
-        terrainShadows?: ShadowMode;
-        mapMode2D?: MapMode2D;
-        blurActiveElementOnCanvasFocus?: boolean;
-        requestRenderMode?: boolean;
-        maximumRenderTimeChange?: number;
-        msaaSamples?: number;
-    });
-    /**
-     * Gets the parent container.
-     */
-    readonly container: Element;
-    /**
-     * Gets the canvas.
-     */
-    readonly canvas: HTMLCanvasElement;
-    /**
-     * Gets the credit container.
-     */
-    readonly creditContainer: Element;
-    /**
-     * Gets the credit viewport
-     */
-    readonly creditViewport: Element;
-    /**
-     * Gets the scene.
-     */
-    readonly scene: Scene;
-    /**
-     * Gets the collection of image layers that will be rendered on the globe.
-     */
-    readonly imageryLayers: ImageryLayerCollection;
-    /**
-     * The terrain provider providing surface geometry for the globe.
-     */
-    terrainProvider: TerrainProvider;
-    /**
-     * Gets the camera.
-     */
-    readonly camera: Camera;
-    /**
-     * Gets the clock.
-     */
-    readonly clock: Clock;
-    /**
-     * Gets the screen space event handler.
-     */
-    readonly screenSpaceEventHandler: ScreenSpaceEventHandler;
-    /**
-     * Gets or sets the target frame rate of the widget when <code>useDefaultRenderLoop</code>
-     * is true. If undefined, the browser's requestAnimationFrame implementation
-     * determines the frame rate.  If defined, this value must be greater than 0.  A value higher
-     * than the underlying requestAnimationFrame implementation will have no effect.
-     */
-    targetFrameRate: number;
-    /**
-     * Gets or sets whether or not this widget should control the render loop.
-     * If true the widget will use requestAnimationFrame to
-     * perform rendering and resizing of the widget, as well as drive the
-     * simulation clock. If set to false, you must manually call the
-     * <code>resize</code>, <code>render</code> methods as part of a custom
-     * render loop.  If an error occurs during rendering, {@link Scene}'s
-     * <code>renderError</code> event will be raised and this property
-     * will be set to false.  It must be set back to true to continue rendering
-     * after the error.
-     */
-    useDefaultRenderLoop: boolean;
-    /**
-     * Gets or sets a scaling factor for rendering resolution.  Values less than 1.0 can improve
-     * performance on less powerful devices while values greater than 1.0 will render at a higher
-     * resolution and then scale down, resulting in improved visual fidelity.
-     * For example, if the widget is laid out at a size of 640x480, setting this value to 0.5
-     * will cause the scene to be rendered at 320x240 and then scaled up while setting
-     * it to 2.0 will cause the scene to be rendered at 1280x960 and then scaled down.
-     */
-    resolutionScale: number;
-    /**
-     * Boolean flag indicating if the browser's recommended resolution is used.
-     * If true, the browser's device pixel ratio is ignored and 1.0 is used instead,
-     * effectively rendering based on CSS pixels instead of device pixels. This can improve
-     * performance on less powerful devices that have high pixel density. When false, rendering
-     * will be in device pixels. {@link CesiumWidget#resolutionScale} will still take effect whether
-     * this flag is true or false.
-     */
-    useBrowserRecommendedResolution: boolean;
-    /**
-     * Show an error panel to the user containing a title and a longer error message,
-     * which can be dismissed using an OK button.  This panel is displayed automatically
-     * when a render loop error occurs, if showRenderLoopErrors was not false when the
-     * widget was constructed.
-     * @param title - The title to be displayed on the error panel.  This string is interpreted as text.
-     * @param [message] - A helpful, user-facing message to display prior to the detailed error information.  This string is interpreted as HTML.
-     * @param [error] - The error to be displayed on the error panel.  This string is formatted using {@link formatError} and then displayed as text.
-     */
-    showErrorPanel(title: string, message?: string, error?: string): void;
-    /**
-     * @returns true if the object has been destroyed, false otherwise.
-     */
-    isDestroyed(): boolean;
-    /**
-     * Destroys the widget.  Should be called if permanently
-     * removing the widget from layout.
-     */
-    destroy(): void;
-    /**
-     * Updates the canvas size, camera aspect ratio, and viewport size.
-     * This function is called automatically as needed unless
-     * <code>useDefaultRenderLoop</code> is set to false.
-     */
-    resize(): void;
-    /**
-     * Renders the scene.  This function is called automatically
-     * unless <code>useDefaultRenderLoop</code> is set to false;
-     */
-    render(): void;
-}
-
-/**
  * A view model which exposes a {@link Clock} for user interfaces.
  * @param [clock] - The clock object wrapped by this view model, if undefined a new instance will be created.
  */
@@ -42844,6 +42879,18 @@ export class Command {
      */
     afterExecute: Event;
 }
+
+/**
+ * Create a Command from a given function, for use with ViewModels.
+ *
+ * A Command is a function with an extra <code>canExecute</code> observable property to determine
+ * whether the command can be executed.  When executed, a Command function will check the
+ * value of <code>canExecute</code> and throw if false.  It also provides events for when
+ * a command has been or is about to be executed.
+ * @param func - The function to execute.
+ * @param [canExecute = true] - A boolean indicating whether the function can currently be executed.
+ */
+export function createCommand(func: (...params: any[]) => any, canExecute?: boolean): void;
 
 /**
  * A single button widget for toggling fullscreen mode.
@@ -43672,72 +43719,6 @@ export class ToggleButtonViewModel {
     command: Command;
 }
 
-/**
- * A single button widget for toggling vr mode.
- * @param container - The DOM element or ID that will contain the widget.
- * @param scene - The scene.
- * @param [vrElement = document.body] - The element or id to be placed into vr mode.
- */
-export class VRButton {
-    constructor(container: Element | string, scene: Scene, vrElement?: Element | string);
-    /**
-     * Gets the parent container.
-     */
-    container: Element;
-    /**
-     * Gets the view model.
-     */
-    viewModel: VRButtonViewModel;
-    /**
-     * @returns true if the object has been destroyed, false otherwise.
-     */
-    isDestroyed(): boolean;
-    /**
-     * Destroys the widget.  Should be called if permanently
-     * removing the widget from layout.
-     */
-    destroy(): void;
-}
-
-/**
- * The view model for {@link VRButton}.
- * @param scene - The scene.
- * @param [vrElement = document.body] - The element or id to be placed into VR mode.
- */
-export class VRButtonViewModel {
-    constructor(scene: Scene, vrElement?: Element | string);
-    /**
-     * Gets whether or not VR mode is active.
-     */
-    isVRMode: boolean;
-    /**
-     * Gets or sets whether or not VR functionality should be enabled.
-     */
-    isVREnabled: boolean;
-    /**
-     * Gets the tooltip.  This property is observable.
-     */
-    tooltip: string;
-    /**
-     * Gets or sets the HTML element to place into VR mode when the
-     * corresponding button is pressed.
-     */
-    vrElement: Element;
-    /**
-     * Gets the Command to toggle VR mode.
-     */
-    command: Command;
-    /**
-     * @returns true if the object has been destroyed, false otherwise.
-     */
-    isDestroyed(): boolean;
-    /**
-     * Destroys the view model.  Should be called to
-     * properly clean up the view model when it is no longer needed.
-     */
-    destroy(): void;
-}
-
 export namespace Viewer {
     /**
      * Initialization options for the Viewer constructor
@@ -43770,7 +43751,7 @@ export namespace Viewer {
      * @property [showRenderLoopErrors = true] - If true, this widget will automatically display an HTML panel to the user containing the error, if a render loop error occurs.
      * @property [useBrowserRecommendedResolution = true] - If true, render at the browser's recommended resolution and ignore <code>window.devicePixelRatio</code>.
      * @property [automaticallyTrackDataSourceClocks = true] - If true, this widget will automatically track the clock settings of newly added DataSources, updating if the DataSource's clock changes.  Set this to false if you want to configure the clock independently.
-     * @property [contextOptions] - Context and WebGL creation properties corresponding to <code>options</code> passed to {@link Scene}.
+     * @property [contextOptions] - Context and WebGL creation properties passed to {@link Scene}.
      * @property [sceneMode = SceneMode.SCENE3D] - The initial scene mode.
      * @property [mapProjection = new GeographicProjection()] - The map projection to use in 2D and Columbus View modes.
      * @property [globe = new Globe(mapProjection.ellipsoid)] - The globe to use in the scene.  If set to <code>false</code>, no globe will be added.
@@ -43819,7 +43800,7 @@ export namespace Viewer {
         showRenderLoopErrors?: boolean;
         useBrowserRecommendedResolution?: boolean;
         automaticallyTrackDataSourceClocks?: boolean;
-        contextOptions?: any;
+        contextOptions?: ContextOptions;
         sceneMode?: SceneMode;
         mapProjection?: MapProjection;
         globe?: Globe | false;
@@ -44227,446 +44208,73 @@ export function viewerPerformanceWatchdogMixin(viewer: Viewer, options?: {
 }): void;
 
 /**
- * Create a Command from a given function, for use with ViewModels.
- *
- * A Command is a function with an extra <code>canExecute</code> observable property to determine
- * whether the command can be executed.  When executed, a Command function will check the
- * value of <code>canExecute</code> and throw if false.  It also provides events for when
- * a command has been or is about to be executed.
- * @param func - The function to execute.
- * @param [canExecute = true] - A boolean indicating whether the function can currently be executed.
+ * A single button widget for toggling vr mode.
+ * @param container - The DOM element or ID that will contain the widget.
+ * @param scene - The scene.
+ * @param [vrElement = document.body] - The element or id to be placed into vr mode.
  */
-export function createCommand(func: (...params: any[]) => any, canExecute?: boolean): void;
+export class VRButton {
+    constructor(container: Element | string, scene: Scene, vrElement?: Element | string);
+    /**
+     * Gets the parent container.
+     */
+    container: Element;
+    /**
+     * Gets the view model.
+     */
+    viewModel: VRButtonViewModel;
+    /**
+     * @returns true if the object has been destroyed, false otherwise.
+     */
+    isDestroyed(): boolean;
+    /**
+     * Destroys the widget.  Should be called if permanently
+     * removing the widget from layout.
+     */
+    destroy(): void;
+}
+
+/**
+ * The view model for {@link VRButton}.
+ * @param scene - The scene.
+ * @param [vrElement = document.body] - The element or id to be placed into VR mode.
+ */
+export class VRButtonViewModel {
+    constructor(scene: Scene, vrElement?: Element | string);
+    /**
+     * Gets whether or not VR mode is active.
+     */
+    isVRMode: boolean;
+    /**
+     * Gets or sets whether or not VR functionality should be enabled.
+     */
+    isVREnabled: boolean;
+    /**
+     * Gets the tooltip.  This property is observable.
+     */
+    tooltip: string;
+    /**
+     * Gets or sets the HTML element to place into VR mode when the
+     * corresponding button is pressed.
+     */
+    vrElement: Element;
+    /**
+     * Gets the Command to toggle VR mode.
+     */
+    command: Command;
+    /**
+     * @returns true if the object has been destroyed, false otherwise.
+     */
+    isDestroyed(): boolean;
+    /**
+     * Destroys the view model.  Should be called to
+     * properly clean up the view model when it is no longer needed.
+     */
+    destroy(): void;
+}
 
 
 
 
 }
 
-declare module "cesium/Source/Core/ArcGISTiledElevationTerrainProvider" { import { ArcGISTiledElevationTerrainProvider } from 'cesium'; export default ArcGISTiledElevationTerrainProvider; }
-declare module "cesium/Source/Core/AssociativeArray" { import { AssociativeArray } from 'cesium'; export default AssociativeArray; }
-declare module "cesium/Source/Core/AxisAlignedBoundingBox" { import { AxisAlignedBoundingBox } from 'cesium'; export default AxisAlignedBoundingBox; }
-declare module "cesium/Source/Core/BingMapsGeocoderService" { import { BingMapsGeocoderService } from 'cesium'; export default BingMapsGeocoderService; }
-declare module "cesium/Source/Core/BoundingRectangle" { import { BoundingRectangle } from 'cesium'; export default BoundingRectangle; }
-declare module "cesium/Source/Core/BoundingSphere" { import { BoundingSphere } from 'cesium'; export default BoundingSphere; }
-declare module "cesium/Source/Core/BoxGeometry" { import { BoxGeometry } from 'cesium'; export default BoxGeometry; }
-declare module "cesium/Source/Core/BoxOutlineGeometry" { import { BoxOutlineGeometry } from 'cesium'; export default BoxOutlineGeometry; }
-declare module "cesium/Source/Core/Cartesian2" { import { Cartesian2 } from 'cesium'; export default Cartesian2; }
-declare module "cesium/Source/Core/Cartesian3" { import { Cartesian3 } from 'cesium'; export default Cartesian3; }
-declare module "cesium/Source/Core/Cartesian4" { import { Cartesian4 } from 'cesium'; export default Cartesian4; }
-declare module "cesium/Source/Core/Cartographic" { import { Cartographic } from 'cesium'; export default Cartographic; }
-declare module "cesium/Source/Core/CartographicGeocoderService" { import { CartographicGeocoderService } from 'cesium'; export default CartographicGeocoderService; }
-declare module "cesium/Source/Core/CatmullRomSpline" { import { CatmullRomSpline } from 'cesium'; export default CatmullRomSpline; }
-declare module "cesium/Source/Core/CesiumTerrainProvider" { import { CesiumTerrainProvider } from 'cesium'; export default CesiumTerrainProvider; }
-declare module "cesium/Source/Core/CircleGeometry" { import { CircleGeometry } from 'cesium'; export default CircleGeometry; }
-declare module "cesium/Source/Core/CircleOutlineGeometry" { import { CircleOutlineGeometry } from 'cesium'; export default CircleOutlineGeometry; }
-declare module "cesium/Source/Core/Clock" { import { Clock } from 'cesium'; export default Clock; }
-declare module "cesium/Source/Core/Color" { import { Color } from 'cesium'; export default Color; }
-declare module "cesium/Source/Core/ColorGeometryInstanceAttribute" { import { ColorGeometryInstanceAttribute } from 'cesium'; export default ColorGeometryInstanceAttribute; }
-declare module "cesium/Source/Core/CompressedTextureBuffer" { import { CompressedTextureBuffer } from 'cesium'; export default CompressedTextureBuffer; }
-declare module "cesium/Source/Core/ConstantSpline" { import { ConstantSpline } from 'cesium'; export default ConstantSpline; }
-declare module "cesium/Source/Core/CoplanarPolygonGeometry" { import { CoplanarPolygonGeometry } from 'cesium'; export default CoplanarPolygonGeometry; }
-declare module "cesium/Source/Core/CoplanarPolygonOutlineGeometry" { import { CoplanarPolygonOutlineGeometry } from 'cesium'; export default CoplanarPolygonOutlineGeometry; }
-declare module "cesium/Source/Core/CorridorGeometry" { import { CorridorGeometry } from 'cesium'; export default CorridorGeometry; }
-declare module "cesium/Source/Core/CorridorOutlineGeometry" { import { CorridorOutlineGeometry } from 'cesium'; export default CorridorOutlineGeometry; }
-declare module "cesium/Source/Core/Credit" { import { Credit } from 'cesium'; export default Credit; }
-declare module "cesium/Source/Core/CubicRealPolynomial" { import { CubicRealPolynomial } from 'cesium'; export default CubicRealPolynomial; }
-declare module "cesium/Source/Core/CullingVolume" { import { CullingVolume } from 'cesium'; export default CullingVolume; }
-declare module "cesium/Source/Core/CustomHeightmapTerrainProvider" { import { CustomHeightmapTerrainProvider } from 'cesium'; export default CustomHeightmapTerrainProvider; }
-declare module "cesium/Source/Core/CylinderGeometry" { import { CylinderGeometry } from 'cesium'; export default CylinderGeometry; }
-declare module "cesium/Source/Core/CylinderOutlineGeometry" { import { CylinderOutlineGeometry } from 'cesium'; export default CylinderOutlineGeometry; }
-declare module "cesium/Source/Core/DefaultProxy" { import { DefaultProxy } from 'cesium'; export default DefaultProxy; }
-declare module "cesium/Source/Core/DeveloperError" { import { DeveloperError } from 'cesium'; export default DeveloperError; }
-declare module "cesium/Source/Core/DistanceDisplayCondition" { import { DistanceDisplayCondition } from 'cesium'; export default DistanceDisplayCondition; }
-declare module "cesium/Source/Core/DistanceDisplayConditionGeometryInstanceAttribute" { import { DistanceDisplayConditionGeometryInstanceAttribute } from 'cesium'; export default DistanceDisplayConditionGeometryInstanceAttribute; }
-declare module "cesium/Source/Core/EasingFunction" { import { EasingFunction } from 'cesium'; export default EasingFunction; }
-declare module "cesium/Source/Core/EllipseGeometry" { import { EllipseGeometry } from 'cesium'; export default EllipseGeometry; }
-declare module "cesium/Source/Core/EllipseOutlineGeometry" { import { EllipseOutlineGeometry } from 'cesium'; export default EllipseOutlineGeometry; }
-declare module "cesium/Source/Core/Ellipsoid" { import { Ellipsoid } from 'cesium'; export default Ellipsoid; }
-declare module "cesium/Source/Core/EllipsoidGeodesic" { import { EllipsoidGeodesic } from 'cesium'; export default EllipsoidGeodesic; }
-declare module "cesium/Source/Core/EllipsoidGeometry" { import { EllipsoidGeometry } from 'cesium'; export default EllipsoidGeometry; }
-declare module "cesium/Source/Core/EllipsoidOutlineGeometry" { import { EllipsoidOutlineGeometry } from 'cesium'; export default EllipsoidOutlineGeometry; }
-declare module "cesium/Source/Core/EllipsoidRhumbLine" { import { EllipsoidRhumbLine } from 'cesium'; export default EllipsoidRhumbLine; }
-declare module "cesium/Source/Core/EllipsoidTangentPlane" { import { EllipsoidTangentPlane } from 'cesium'; export default EllipsoidTangentPlane; }
-declare module "cesium/Source/Core/EllipsoidTerrainProvider" { import { EllipsoidTerrainProvider } from 'cesium'; export default EllipsoidTerrainProvider; }
-declare module "cesium/Source/Core/Event" { import { Event } from 'cesium'; export default Event; }
-declare module "cesium/Source/Core/EventHelper" { import { EventHelper } from 'cesium'; export default EventHelper; }
-declare module "cesium/Source/Core/FeatureDetection" { import { FeatureDetection } from 'cesium'; export default FeatureDetection; }
-declare module "cesium/Source/Core/FrustumGeometry" { import { FrustumGeometry } from 'cesium'; export default FrustumGeometry; }
-declare module "cesium/Source/Core/FrustumOutlineGeometry" { import { FrustumOutlineGeometry } from 'cesium'; export default FrustumOutlineGeometry; }
-declare module "cesium/Source/Core/Fullscreen" { import { Fullscreen } from 'cesium'; export default Fullscreen; }
-declare module "cesium/Source/Core/GeocoderService" { import { GeocoderService } from 'cesium'; export default GeocoderService; }
-declare module "cesium/Source/Core/GeographicProjection" { import { GeographicProjection } from 'cesium'; export default GeographicProjection; }
-declare module "cesium/Source/Core/GeographicTilingScheme" { import { GeographicTilingScheme } from 'cesium'; export default GeographicTilingScheme; }
-declare module "cesium/Source/Core/Geometry" { import { Geometry } from 'cesium'; export default Geometry; }
-declare module "cesium/Source/Core/GeometryAttribute" { import { GeometryAttribute } from 'cesium'; export default GeometryAttribute; }
-declare module "cesium/Source/Core/GeometryAttributes" { import { GeometryAttributes } from 'cesium'; export default GeometryAttributes; }
-declare module "cesium/Source/Core/GeometryFactory" { import { GeometryFactory } from 'cesium'; export default GeometryFactory; }
-declare module "cesium/Source/Core/GeometryInstance" { import { GeometryInstance } from 'cesium'; export default GeometryInstance; }
-declare module "cesium/Source/Core/GeometryInstanceAttribute" { import { GeometryInstanceAttribute } from 'cesium'; export default GeometryInstanceAttribute; }
-declare module "cesium/Source/Core/GeometryPipeline" { import { GeometryPipeline } from 'cesium'; export default GeometryPipeline; }
-declare module "cesium/Source/Core/GoogleEarthEnterpriseMetadata" { import { GoogleEarthEnterpriseMetadata } from 'cesium'; export default GoogleEarthEnterpriseMetadata; }
-declare module "cesium/Source/Core/GoogleEarthEnterpriseTerrainData" { import { GoogleEarthEnterpriseTerrainData } from 'cesium'; export default GoogleEarthEnterpriseTerrainData; }
-declare module "cesium/Source/Core/GoogleEarthEnterpriseTerrainProvider" { import { GoogleEarthEnterpriseTerrainProvider } from 'cesium'; export default GoogleEarthEnterpriseTerrainProvider; }
-declare module "cesium/Source/Core/GregorianDate" { import { GregorianDate } from 'cesium'; export default GregorianDate; }
-declare module "cesium/Source/Core/GroundPolylineGeometry" { import { GroundPolylineGeometry } from 'cesium'; export default GroundPolylineGeometry; }
-declare module "cesium/Source/Core/HeadingPitchRange" { import { HeadingPitchRange } from 'cesium'; export default HeadingPitchRange; }
-declare module "cesium/Source/Core/HeadingPitchRoll" { import { HeadingPitchRoll } from 'cesium'; export default HeadingPitchRoll; }
-declare module "cesium/Source/Core/HeightmapTerrainData" { import { HeightmapTerrainData } from 'cesium'; export default HeightmapTerrainData; }
-declare module "cesium/Source/Core/HermitePolynomialApproximation" { import { HermitePolynomialApproximation } from 'cesium'; export default HermitePolynomialApproximation; }
-declare module "cesium/Source/Core/HermiteSpline" { import { HermiteSpline } from 'cesium'; export default HermiteSpline; }
-declare module "cesium/Source/Core/HilbertOrder" { import { HilbertOrder } from 'cesium'; export default HilbertOrder; }
-declare module "cesium/Source/Core/InterpolationAlgorithm" { import { InterpolationAlgorithm } from 'cesium'; export default InterpolationAlgorithm; }
-declare module "cesium/Source/Core/IntersectionTests" { import { IntersectionTests } from 'cesium'; export default IntersectionTests; }
-declare module "cesium/Source/Core/Intersections2D" { import { Intersections2D } from 'cesium'; export default Intersections2D; }
-declare module "cesium/Source/Core/Interval" { import { Interval } from 'cesium'; export default Interval; }
-declare module "cesium/Source/Core/Ion" { import { Ion } from 'cesium'; export default Ion; }
-declare module "cesium/Source/Core/IonGeocoderService" { import { IonGeocoderService } from 'cesium'; export default IonGeocoderService; }
-declare module "cesium/Source/Core/IonResource" { import { IonResource } from 'cesium'; export default IonResource; }
-declare module "cesium/Source/Core/Iso8601" { import { Iso8601 } from 'cesium'; export default Iso8601; }
-declare module "cesium/Source/Core/JulianDate" { import { JulianDate } from 'cesium'; export default JulianDate; }
-declare module "cesium/Source/Core/LagrangePolynomialApproximation" { import { LagrangePolynomialApproximation } from 'cesium'; export default LagrangePolynomialApproximation; }
-declare module "cesium/Source/Core/LeapSecond" { import { LeapSecond } from 'cesium'; export default LeapSecond; }
-declare module "cesium/Source/Core/LinearApproximation" { import { LinearApproximation } from 'cesium'; export default LinearApproximation; }
-declare module "cesium/Source/Core/LinearSpline" { import { LinearSpline } from 'cesium'; export default LinearSpline; }
-declare module "cesium/Source/Core/MapProjection" { import { MapProjection } from 'cesium'; export default MapProjection; }
-declare module "cesium/Source/Core/Math" { import { Math } from 'cesium'; export default Math; }
-declare module "cesium/Source/Core/Matrix2" { import { Matrix2 } from 'cesium'; export default Matrix2; }
-declare module "cesium/Source/Core/Matrix3" { import { Matrix3 } from 'cesium'; export default Matrix3; }
-declare module "cesium/Source/Core/Matrix4" { import { Matrix4 } from 'cesium'; export default Matrix4; }
-declare module "cesium/Source/Core/MorphWeightSpline" { import { MorphWeightSpline } from 'cesium'; export default MorphWeightSpline; }
-declare module "cesium/Source/Core/NearFarScalar" { import { NearFarScalar } from 'cesium'; export default NearFarScalar; }
-declare module "cesium/Source/Core/Occluder" { import { Occluder } from 'cesium'; export default Occluder; }
-declare module "cesium/Source/Core/OpenCageGeocoderService" { import { OpenCageGeocoderService } from 'cesium'; export default OpenCageGeocoderService; }
-declare module "cesium/Source/Core/OrientedBoundingBox" { import { OrientedBoundingBox } from 'cesium'; export default OrientedBoundingBox; }
-declare module "cesium/Source/Core/OrthographicFrustum" { import { OrthographicFrustum } from 'cesium'; export default OrthographicFrustum; }
-declare module "cesium/Source/Core/OrthographicOffCenterFrustum" { import { OrthographicOffCenterFrustum } from 'cesium'; export default OrthographicOffCenterFrustum; }
-declare module "cesium/Source/Core/Packable" { import { Packable } from 'cesium'; export default Packable; }
-declare module "cesium/Source/Core/PackableForInterpolation" { import { PackableForInterpolation } from 'cesium'; export default PackableForInterpolation; }
-declare module "cesium/Source/Core/PeliasGeocoderService" { import { PeliasGeocoderService } from 'cesium'; export default PeliasGeocoderService; }
-declare module "cesium/Source/Core/PerspectiveFrustum" { import { PerspectiveFrustum } from 'cesium'; export default PerspectiveFrustum; }
-declare module "cesium/Source/Core/PerspectiveOffCenterFrustum" { import { PerspectiveOffCenterFrustum } from 'cesium'; export default PerspectiveOffCenterFrustum; }
-declare module "cesium/Source/Core/PinBuilder" { import { PinBuilder } from 'cesium'; export default PinBuilder; }
-declare module "cesium/Source/Core/Plane" { import { Plane } from 'cesium'; export default Plane; }
-declare module "cesium/Source/Core/PlaneGeometry" { import { PlaneGeometry } from 'cesium'; export default PlaneGeometry; }
-declare module "cesium/Source/Core/PlaneOutlineGeometry" { import { PlaneOutlineGeometry } from 'cesium'; export default PlaneOutlineGeometry; }
-declare module "cesium/Source/Core/PolygonGeometry" { import { PolygonGeometry } from 'cesium'; export default PolygonGeometry; }
-declare module "cesium/Source/Core/PolygonHierarchy" { import { PolygonHierarchy } from 'cesium'; export default PolygonHierarchy; }
-declare module "cesium/Source/Core/PolygonOutlineGeometry" { import { PolygonOutlineGeometry } from 'cesium'; export default PolygonOutlineGeometry; }
-declare module "cesium/Source/Core/PolylineGeometry" { import { PolylineGeometry } from 'cesium'; export default PolylineGeometry; }
-declare module "cesium/Source/Core/PolylineVolumeGeometry" { import { PolylineVolumeGeometry } from 'cesium'; export default PolylineVolumeGeometry; }
-declare module "cesium/Source/Core/PolylineVolumeOutlineGeometry" { import { PolylineVolumeOutlineGeometry } from 'cesium'; export default PolylineVolumeOutlineGeometry; }
-declare module "cesium/Source/Core/Proxy" { import { Proxy } from 'cesium'; export default Proxy; }
-declare module "cesium/Source/Core/QuadraticRealPolynomial" { import { QuadraticRealPolynomial } from 'cesium'; export default QuadraticRealPolynomial; }
-declare module "cesium/Source/Core/QuantizedMeshTerrainData" { import { QuantizedMeshTerrainData } from 'cesium'; export default QuantizedMeshTerrainData; }
-declare module "cesium/Source/Core/QuarticRealPolynomial" { import { QuarticRealPolynomial } from 'cesium'; export default QuarticRealPolynomial; }
-declare module "cesium/Source/Core/Quaternion" { import { Quaternion } from 'cesium'; export default Quaternion; }
-declare module "cesium/Source/Core/QuaternionSpline" { import { QuaternionSpline } from 'cesium'; export default QuaternionSpline; }
-declare module "cesium/Source/Core/Queue" { import { Queue } from 'cesium'; export default Queue; }
-declare module "cesium/Source/Core/Ray" { import { Ray } from 'cesium'; export default Ray; }
-declare module "cesium/Source/Core/Rectangle" { import { Rectangle } from 'cesium'; export default Rectangle; }
-declare module "cesium/Source/Core/RectangleGeometry" { import { RectangleGeometry } from 'cesium'; export default RectangleGeometry; }
-declare module "cesium/Source/Core/RectangleOutlineGeometry" { import { RectangleOutlineGeometry } from 'cesium'; export default RectangleOutlineGeometry; }
-declare module "cesium/Source/Core/Request" { import { Request } from 'cesium'; export default Request; }
-declare module "cesium/Source/Core/RequestErrorEvent" { import { RequestErrorEvent } from 'cesium'; export default RequestErrorEvent; }
-declare module "cesium/Source/Core/RequestScheduler" { import { RequestScheduler } from 'cesium'; export default RequestScheduler; }
-declare module "cesium/Source/Core/Resource" { import { Resource } from 'cesium'; export default Resource; }
-declare module "cesium/Source/Core/RuntimeError" { import { RuntimeError } from 'cesium'; export default RuntimeError; }
-declare module "cesium/Source/Core/ScreenSpaceEventHandler" { import { ScreenSpaceEventHandler } from 'cesium'; export default ScreenSpaceEventHandler; }
-declare module "cesium/Source/Core/ShowGeometryInstanceAttribute" { import { ShowGeometryInstanceAttribute } from 'cesium'; export default ShowGeometryInstanceAttribute; }
-declare module "cesium/Source/Core/Simon1994PlanetaryPositions" { import { Simon1994PlanetaryPositions } from 'cesium'; export default Simon1994PlanetaryPositions; }
-declare module "cesium/Source/Core/SimplePolylineGeometry" { import { SimplePolylineGeometry } from 'cesium'; export default SimplePolylineGeometry; }
-declare module "cesium/Source/Core/SphereGeometry" { import { SphereGeometry } from 'cesium'; export default SphereGeometry; }
-declare module "cesium/Source/Core/SphereOutlineGeometry" { import { SphereOutlineGeometry } from 'cesium'; export default SphereOutlineGeometry; }
-declare module "cesium/Source/Core/Spherical" { import { Spherical } from 'cesium'; export default Spherical; }
-declare module "cesium/Source/Core/Spline" { import { Spline } from 'cesium'; export default Spline; }
-declare module "cesium/Source/Core/SteppedSpline" { import { SteppedSpline } from 'cesium'; export default SteppedSpline; }
-declare module "cesium/Source/Core/TaskProcessor" { import { TaskProcessor } from 'cesium'; export default TaskProcessor; }
-declare module "cesium/Source/Core/TerrainData" { import { TerrainData } from 'cesium'; export default TerrainData; }
-declare module "cesium/Source/Core/TerrainProvider" { import { TerrainProvider } from 'cesium'; export default TerrainProvider; }
-declare module "cesium/Source/Core/TileAvailability" { import { TileAvailability } from 'cesium'; export default TileAvailability; }
-declare module "cesium/Source/Core/TileProviderError" { import { TileProviderError } from 'cesium'; export default TileProviderError; }
-declare module "cesium/Source/Core/TilingScheme" { import { TilingScheme } from 'cesium'; export default TilingScheme; }
-declare module "cesium/Source/Core/TimeInterval" { import { TimeInterval } from 'cesium'; export default TimeInterval; }
-declare module "cesium/Source/Core/TimeIntervalCollection" { import { TimeIntervalCollection } from 'cesium'; export default TimeIntervalCollection; }
-declare module "cesium/Source/Core/Transforms" { import { Transforms } from 'cesium'; export default Transforms; }
-declare module "cesium/Source/Core/TranslationRotationScale" { import { TranslationRotationScale } from 'cesium'; export default TranslationRotationScale; }
-declare module "cesium/Source/Core/TridiagonalSystemSolver" { import { TridiagonalSystemSolver } from 'cesium'; export default TridiagonalSystemSolver; }
-declare module "cesium/Source/Core/TrustedServers" { import { TrustedServers } from 'cesium'; export default TrustedServers; }
-declare module "cesium/Source/Core/VRTheWorldTerrainProvider" { import { VRTheWorldTerrainProvider } from 'cesium'; export default VRTheWorldTerrainProvider; }
-declare module "cesium/Source/Core/VertexFormat" { import { VertexFormat } from 'cesium'; export default VertexFormat; }
-declare module "cesium/Source/Core/VideoSynchronizer" { import { VideoSynchronizer } from 'cesium'; export default VideoSynchronizer; }
-declare module "cesium/Source/Core/WallGeometry" { import { WallGeometry } from 'cesium'; export default WallGeometry; }
-declare module "cesium/Source/Core/WallOutlineGeometry" { import { WallOutlineGeometry } from 'cesium'; export default WallOutlineGeometry; }
-declare module "cesium/Source/Core/WebMercatorProjection" { import { WebMercatorProjection } from 'cesium'; export default WebMercatorProjection; }
-declare module "cesium/Source/Core/WebMercatorTilingScheme" { import { WebMercatorTilingScheme } from 'cesium'; export default WebMercatorTilingScheme; }
-declare module "cesium/Source/Core/barycentricCoordinates" { import { barycentricCoordinates } from 'cesium'; export default barycentricCoordinates; }
-declare module "cesium/Source/Core/binarySearch" { import { binarySearch } from 'cesium'; export default binarySearch; }
-declare module "cesium/Source/Core/buildModuleUrl" { import { buildModuleUrl } from 'cesium'; export default buildModuleUrl; }
-declare module "cesium/Source/Core/clone" { import { clone } from 'cesium'; export default clone; }
-declare module "cesium/Source/Core/combine" { import { combine } from 'cesium'; export default combine; }
-declare module "cesium/Source/Core/createGuid" { import { createGuid } from 'cesium'; export default createGuid; }
-declare module "cesium/Source/Core/createWorldTerrain" { import { createWorldTerrain } from 'cesium'; export default createWorldTerrain; }
-declare module "cesium/Source/Core/defaultValue" { import { defaultValue } from 'cesium'; export default defaultValue; }
-declare module "cesium/Source/Core/defined" { import { defined } from 'cesium'; export default defined; }
-declare module "cesium/Source/Core/destroyObject" { import { destroyObject } from 'cesium'; export default destroyObject; }
-declare module "cesium/Source/Core/formatError" { import { formatError } from 'cesium'; export default formatError; }
-declare module "cesium/Source/Core/getAbsoluteUri" { import { getAbsoluteUri } from 'cesium'; export default getAbsoluteUri; }
-declare module "cesium/Source/Core/getBaseUri" { import { getBaseUri } from 'cesium'; export default getBaseUri; }
-declare module "cesium/Source/Core/getExtensionFromUri" { import { getExtensionFromUri } from 'cesium'; export default getExtensionFromUri; }
-declare module "cesium/Source/Core/getFilenameFromUri" { import { getFilenameFromUri } from 'cesium'; export default getFilenameFromUri; }
-declare module "cesium/Source/Core/getImagePixels" { import { getImagePixels } from 'cesium'; export default getImagePixels; }
-declare module "cesium/Source/Core/getTimestamp" { import { getTimestamp } from 'cesium'; export default getTimestamp; }
-declare module "cesium/Source/Core/isLeapYear" { import { isLeapYear } from 'cesium'; export default isLeapYear; }
-declare module "cesium/Source/Core/mergeSort" { import { mergeSort } from 'cesium'; export default mergeSort; }
-declare module "cesium/Source/Core/objectToQuery" { import { objectToQuery } from 'cesium'; export default objectToQuery; }
-declare module "cesium/Source/Core/pointInsideTriangle" { import { pointInsideTriangle } from 'cesium'; export default pointInsideTriangle; }
-declare module "cesium/Source/Core/queryToObject" { import { queryToObject } from 'cesium'; export default queryToObject; }
-declare module "cesium/Source/Core/sampleTerrain" { import { sampleTerrain } from 'cesium'; export default sampleTerrain; }
-declare module "cesium/Source/Core/sampleTerrainMostDetailed" { import { sampleTerrainMostDetailed } from 'cesium'; export default sampleTerrainMostDetailed; }
-declare module "cesium/Source/Core/subdivideArray" { import { subdivideArray } from 'cesium'; export default subdivideArray; }
-declare module "cesium/Source/Core/writeTextToCanvas" { import { writeTextToCanvas } from 'cesium'; export default writeTextToCanvas; }
-declare module "cesium/Source/DataSources/BillboardGraphics" { import { BillboardGraphics } from 'cesium'; export default BillboardGraphics; }
-declare module "cesium/Source/DataSources/BillboardVisualizer" { import { BillboardVisualizer } from 'cesium'; export default BillboardVisualizer; }
-declare module "cesium/Source/DataSources/BoxGeometryUpdater" { import { BoxGeometryUpdater } from 'cesium'; export default BoxGeometryUpdater; }
-declare module "cesium/Source/DataSources/BoxGraphics" { import { BoxGraphics } from 'cesium'; export default BoxGraphics; }
-declare module "cesium/Source/DataSources/CallbackProperty" { import { CallbackProperty } from 'cesium'; export default CallbackProperty; }
-declare module "cesium/Source/DataSources/Cesium3DTilesetGraphics" { import { Cesium3DTilesetGraphics } from 'cesium'; export default Cesium3DTilesetGraphics; }
-declare module "cesium/Source/DataSources/Cesium3DTilesetVisualizer" { import { Cesium3DTilesetVisualizer } from 'cesium'; export default Cesium3DTilesetVisualizer; }
-declare module "cesium/Source/DataSources/CheckerboardMaterialProperty" { import { CheckerboardMaterialProperty } from 'cesium'; export default CheckerboardMaterialProperty; }
-declare module "cesium/Source/DataSources/ColorMaterialProperty" { import { ColorMaterialProperty } from 'cesium'; export default ColorMaterialProperty; }
-declare module "cesium/Source/DataSources/CompositeEntityCollection" { import { CompositeEntityCollection } from 'cesium'; export default CompositeEntityCollection; }
-declare module "cesium/Source/DataSources/CompositeMaterialProperty" { import { CompositeMaterialProperty } from 'cesium'; export default CompositeMaterialProperty; }
-declare module "cesium/Source/DataSources/CompositePositionProperty" { import { CompositePositionProperty } from 'cesium'; export default CompositePositionProperty; }
-declare module "cesium/Source/DataSources/CompositeProperty" { import { CompositeProperty } from 'cesium'; export default CompositeProperty; }
-declare module "cesium/Source/DataSources/ConstantPositionProperty" { import { ConstantPositionProperty } from 'cesium'; export default ConstantPositionProperty; }
-declare module "cesium/Source/DataSources/ConstantProperty" { import { ConstantProperty } from 'cesium'; export default ConstantProperty; }
-declare module "cesium/Source/DataSources/CorridorGeometryUpdater" { import { CorridorGeometryUpdater } from 'cesium'; export default CorridorGeometryUpdater; }
-declare module "cesium/Source/DataSources/CorridorGraphics" { import { CorridorGraphics } from 'cesium'; export default CorridorGraphics; }
-declare module "cesium/Source/DataSources/CustomDataSource" { import { CustomDataSource } from 'cesium'; export default CustomDataSource; }
-declare module "cesium/Source/DataSources/CylinderGeometryUpdater" { import { CylinderGeometryUpdater } from 'cesium'; export default CylinderGeometryUpdater; }
-declare module "cesium/Source/DataSources/CylinderGraphics" { import { CylinderGraphics } from 'cesium'; export default CylinderGraphics; }
-declare module "cesium/Source/DataSources/CzmlDataSource" { import { CzmlDataSource } from 'cesium'; export default CzmlDataSource; }
-declare module "cesium/Source/DataSources/DataSource" { import { DataSource } from 'cesium'; export default DataSource; }
-declare module "cesium/Source/DataSources/DataSourceClock" { import { DataSourceClock } from 'cesium'; export default DataSourceClock; }
-declare module "cesium/Source/DataSources/DataSourceCollection" { import { DataSourceCollection } from 'cesium'; export default DataSourceCollection; }
-declare module "cesium/Source/DataSources/DataSourceDisplay" { import { DataSourceDisplay } from 'cesium'; export default DataSourceDisplay; }
-declare module "cesium/Source/DataSources/EllipseGeometryUpdater" { import { EllipseGeometryUpdater } from 'cesium'; export default EllipseGeometryUpdater; }
-declare module "cesium/Source/DataSources/EllipseGraphics" { import { EllipseGraphics } from 'cesium'; export default EllipseGraphics; }
-declare module "cesium/Source/DataSources/EllipsoidGeometryUpdater" { import { EllipsoidGeometryUpdater } from 'cesium'; export default EllipsoidGeometryUpdater; }
-declare module "cesium/Source/DataSources/EllipsoidGraphics" { import { EllipsoidGraphics } from 'cesium'; export default EllipsoidGraphics; }
-declare module "cesium/Source/DataSources/Entity" { import { Entity } from 'cesium'; export default Entity; }
-declare module "cesium/Source/DataSources/EntityCluster" { import { EntityCluster } from 'cesium'; export default EntityCluster; }
-declare module "cesium/Source/DataSources/EntityCollection" { import { EntityCollection } from 'cesium'; export default EntityCollection; }
-declare module "cesium/Source/DataSources/EntityView" { import { EntityView } from 'cesium'; export default EntityView; }
-declare module "cesium/Source/DataSources/GeoJsonDataSource" { import { GeoJsonDataSource } from 'cesium'; export default GeoJsonDataSource; }
-declare module "cesium/Source/DataSources/GeometryUpdater" { import { GeometryUpdater } from 'cesium'; export default GeometryUpdater; }
-declare module "cesium/Source/DataSources/GeometryVisualizer" { import { GeometryVisualizer } from 'cesium'; export default GeometryVisualizer; }
-declare module "cesium/Source/DataSources/GpxDataSource" { import { GpxDataSource } from 'cesium'; export default GpxDataSource; }
-declare module "cesium/Source/DataSources/GridMaterialProperty" { import { GridMaterialProperty } from 'cesium'; export default GridMaterialProperty; }
-declare module "cesium/Source/DataSources/GroundGeometryUpdater" { import { GroundGeometryUpdater } from 'cesium'; export default GroundGeometryUpdater; }
-declare module "cesium/Source/DataSources/ImageMaterialProperty" { import { ImageMaterialProperty } from 'cesium'; export default ImageMaterialProperty; }
-declare module "cesium/Source/DataSources/KmlCamera" { import { KmlCamera } from 'cesium'; export default KmlCamera; }
-declare module "cesium/Source/DataSources/KmlDataSource" { import { KmlDataSource } from 'cesium'; export default KmlDataSource; }
-declare module "cesium/Source/DataSources/KmlLookAt" { import { KmlLookAt } from 'cesium'; export default KmlLookAt; }
-declare module "cesium/Source/DataSources/KmlTour" { import { KmlTour } from 'cesium'; export default KmlTour; }
-declare module "cesium/Source/DataSources/KmlTourFlyTo" { import { KmlTourFlyTo } from 'cesium'; export default KmlTourFlyTo; }
-declare module "cesium/Source/DataSources/KmlTourWait" { import { KmlTourWait } from 'cesium'; export default KmlTourWait; }
-declare module "cesium/Source/DataSources/LabelGraphics" { import { LabelGraphics } from 'cesium'; export default LabelGraphics; }
-declare module "cesium/Source/DataSources/LabelVisualizer" { import { LabelVisualizer } from 'cesium'; export default LabelVisualizer; }
-declare module "cesium/Source/DataSources/MaterialProperty" { import { MaterialProperty } from 'cesium'; export default MaterialProperty; }
-declare module "cesium/Source/DataSources/ModelGraphics" { import { ModelGraphics } from 'cesium'; export default ModelGraphics; }
-declare module "cesium/Source/DataSources/ModelVisualizer" { import { ModelVisualizer } from 'cesium'; export default ModelVisualizer; }
-declare module "cesium/Source/DataSources/NodeTransformationProperty" { import { NodeTransformationProperty } from 'cesium'; export default NodeTransformationProperty; }
-declare module "cesium/Source/DataSources/PathGraphics" { import { PathGraphics } from 'cesium'; export default PathGraphics; }
-declare module "cesium/Source/DataSources/PathVisualizer" { import { PathVisualizer } from 'cesium'; export default PathVisualizer; }
-declare module "cesium/Source/DataSources/PlaneGeometryUpdater" { import { PlaneGeometryUpdater } from 'cesium'; export default PlaneGeometryUpdater; }
-declare module "cesium/Source/DataSources/PlaneGraphics" { import { PlaneGraphics } from 'cesium'; export default PlaneGraphics; }
-declare module "cesium/Source/DataSources/PointGraphics" { import { PointGraphics } from 'cesium'; export default PointGraphics; }
-declare module "cesium/Source/DataSources/PointVisualizer" { import { PointVisualizer } from 'cesium'; export default PointVisualizer; }
-declare module "cesium/Source/DataSources/PolygonGeometryUpdater" { import { PolygonGeometryUpdater } from 'cesium'; export default PolygonGeometryUpdater; }
-declare module "cesium/Source/DataSources/PolygonGraphics" { import { PolygonGraphics } from 'cesium'; export default PolygonGraphics; }
-declare module "cesium/Source/DataSources/PolylineArrowMaterialProperty" { import { PolylineArrowMaterialProperty } from 'cesium'; export default PolylineArrowMaterialProperty; }
-declare module "cesium/Source/DataSources/PolylineDashMaterialProperty" { import { PolylineDashMaterialProperty } from 'cesium'; export default PolylineDashMaterialProperty; }
-declare module "cesium/Source/DataSources/PolylineGeometryUpdater" { import { PolylineGeometryUpdater } from 'cesium'; export default PolylineGeometryUpdater; }
-declare module "cesium/Source/DataSources/PolylineGlowMaterialProperty" { import { PolylineGlowMaterialProperty } from 'cesium'; export default PolylineGlowMaterialProperty; }
-declare module "cesium/Source/DataSources/PolylineGraphics" { import { PolylineGraphics } from 'cesium'; export default PolylineGraphics; }
-declare module "cesium/Source/DataSources/PolylineOutlineMaterialProperty" { import { PolylineOutlineMaterialProperty } from 'cesium'; export default PolylineOutlineMaterialProperty; }
-declare module "cesium/Source/DataSources/PolylineVisualizer" { import { PolylineVisualizer } from 'cesium'; export default PolylineVisualizer; }
-declare module "cesium/Source/DataSources/PolylineVolumeGeometryUpdater" { import { PolylineVolumeGeometryUpdater } from 'cesium'; export default PolylineVolumeGeometryUpdater; }
-declare module "cesium/Source/DataSources/PolylineVolumeGraphics" { import { PolylineVolumeGraphics } from 'cesium'; export default PolylineVolumeGraphics; }
-declare module "cesium/Source/DataSources/PositionProperty" { import { PositionProperty } from 'cesium'; export default PositionProperty; }
-declare module "cesium/Source/DataSources/PositionPropertyArray" { import { PositionPropertyArray } from 'cesium'; export default PositionPropertyArray; }
-declare module "cesium/Source/DataSources/Property" { import { Property } from 'cesium'; export default Property; }
-declare module "cesium/Source/DataSources/PropertyArray" { import { PropertyArray } from 'cesium'; export default PropertyArray; }
-declare module "cesium/Source/DataSources/PropertyBag" { import { PropertyBag } from 'cesium'; export default PropertyBag; }
-declare module "cesium/Source/DataSources/RectangleGeometryUpdater" { import { RectangleGeometryUpdater } from 'cesium'; export default RectangleGeometryUpdater; }
-declare module "cesium/Source/DataSources/RectangleGraphics" { import { RectangleGraphics } from 'cesium'; export default RectangleGraphics; }
-declare module "cesium/Source/DataSources/ReferenceProperty" { import { ReferenceProperty } from 'cesium'; export default ReferenceProperty; }
-declare module "cesium/Source/DataSources/Rotation" { import { Rotation } from 'cesium'; export default Rotation; }
-declare module "cesium/Source/DataSources/SampledPositionProperty" { import { SampledPositionProperty } from 'cesium'; export default SampledPositionProperty; }
-declare module "cesium/Source/DataSources/SampledProperty" { import { SampledProperty } from 'cesium'; export default SampledProperty; }
-declare module "cesium/Source/DataSources/StripeMaterialProperty" { import { StripeMaterialProperty } from 'cesium'; export default StripeMaterialProperty; }
-declare module "cesium/Source/DataSources/TimeIntervalCollectionPositionProperty" { import { TimeIntervalCollectionPositionProperty } from 'cesium'; export default TimeIntervalCollectionPositionProperty; }
-declare module "cesium/Source/DataSources/TimeIntervalCollectionProperty" { import { TimeIntervalCollectionProperty } from 'cesium'; export default TimeIntervalCollectionProperty; }
-declare module "cesium/Source/DataSources/VelocityOrientationProperty" { import { VelocityOrientationProperty } from 'cesium'; export default VelocityOrientationProperty; }
-declare module "cesium/Source/DataSources/VelocityVectorProperty" { import { VelocityVectorProperty } from 'cesium'; export default VelocityVectorProperty; }
-declare module "cesium/Source/DataSources/Visualizer" { import { Visualizer } from 'cesium'; export default Visualizer; }
-declare module "cesium/Source/DataSources/WallGeometryUpdater" { import { WallGeometryUpdater } from 'cesium'; export default WallGeometryUpdater; }
-declare module "cesium/Source/DataSources/WallGraphics" { import { WallGraphics } from 'cesium'; export default WallGraphics; }
-declare module "cesium/Source/DataSources/exportKml" { import { exportKml } from 'cesium'; export default exportKml; }
-declare module "cesium/Source/Scene/Appearance" { import { Appearance } from 'cesium'; export default Appearance; }
-declare module "cesium/Source/Scene/ArcGisMapServerImageryProvider" { import { ArcGisMapServerImageryProvider } from 'cesium'; export default ArcGisMapServerImageryProvider; }
-declare module "cesium/Source/Scene/Billboard" { import { Billboard } from 'cesium'; export default Billboard; }
-declare module "cesium/Source/Scene/BillboardCollection" { import { BillboardCollection } from 'cesium'; export default BillboardCollection; }
-declare module "cesium/Source/Scene/BingMapsImageryProvider" { import { BingMapsImageryProvider } from 'cesium'; export default BingMapsImageryProvider; }
-declare module "cesium/Source/Scene/BlendingState" { import { BlendingState } from 'cesium'; export default BlendingState; }
-declare module "cesium/Source/Scene/BoxEmitter" { import { BoxEmitter } from 'cesium'; export default BoxEmitter; }
-declare module "cesium/Source/Scene/Camera" { import { Camera } from 'cesium'; export default Camera; }
-declare module "cesium/Source/Scene/CameraEventAggregator" { import { CameraEventAggregator } from 'cesium'; export default CameraEventAggregator; }
-declare module "cesium/Source/Scene/Cesium3DTile" { import { Cesium3DTile } from 'cesium'; export default Cesium3DTile; }
-declare module "cesium/Source/Scene/Cesium3DTileContent" { import { Cesium3DTileContent } from 'cesium'; export default Cesium3DTileContent; }
-declare module "cesium/Source/Scene/Cesium3DTileFeature" { import { Cesium3DTileFeature } from 'cesium'; export default Cesium3DTileFeature; }
-declare module "cesium/Source/Scene/Cesium3DTilePointFeature" { import { Cesium3DTilePointFeature } from 'cesium'; export default Cesium3DTilePointFeature; }
-declare module "cesium/Source/Scene/Cesium3DTileStyle" { import { Cesium3DTileStyle } from 'cesium'; export default Cesium3DTileStyle; }
-declare module "cesium/Source/Scene/Cesium3DTileset" { import { Cesium3DTileset } from 'cesium'; export default Cesium3DTileset; }
-declare module "cesium/Source/Scene/CircleEmitter" { import { CircleEmitter } from 'cesium'; export default CircleEmitter; }
-declare module "cesium/Source/Scene/ClassificationPrimitive" { import { ClassificationPrimitive } from 'cesium'; export default ClassificationPrimitive; }
-declare module "cesium/Source/Scene/ClippingPlane" { import { ClippingPlane } from 'cesium'; export default ClippingPlane; }
-declare module "cesium/Source/Scene/ClippingPlaneCollection" { import { ClippingPlaneCollection } from 'cesium'; export default ClippingPlaneCollection; }
-declare module "cesium/Source/Scene/CloudCollection" { import { CloudCollection } from 'cesium'; export default CloudCollection; }
-declare module "cesium/Source/Scene/ConditionsExpression" { import { ConditionsExpression } from 'cesium'; export default ConditionsExpression; }
-declare module "cesium/Source/Scene/ConeEmitter" { import { ConeEmitter } from 'cesium'; export default ConeEmitter; }
-declare module "cesium/Source/Scene/CreditDisplay" { import { CreditDisplay } from 'cesium'; export default CreditDisplay; }
-declare module "cesium/Source/Scene/CumulusCloud" { import { CumulusCloud } from 'cesium'; export default CumulusCloud; }
-declare module "cesium/Source/Scene/DebugAppearance" { import { DebugAppearance } from 'cesium'; export default DebugAppearance; }
-declare module "cesium/Source/Scene/DebugCameraPrimitive" { import { DebugCameraPrimitive } from 'cesium'; export default DebugCameraPrimitive; }
-declare module "cesium/Source/Scene/DebugModelMatrixPrimitive" { import { DebugModelMatrixPrimitive } from 'cesium'; export default DebugModelMatrixPrimitive; }
-declare module "cesium/Source/Scene/DirectionalLight" { import { DirectionalLight } from 'cesium'; export default DirectionalLight; }
-declare module "cesium/Source/Scene/DiscardEmptyTileImagePolicy" { import { DiscardEmptyTileImagePolicy } from 'cesium'; export default DiscardEmptyTileImagePolicy; }
-declare module "cesium/Source/Scene/DiscardMissingTileImagePolicy" { import { DiscardMissingTileImagePolicy } from 'cesium'; export default DiscardMissingTileImagePolicy; }
-declare module "cesium/Source/Scene/EllipsoidSurfaceAppearance" { import { EllipsoidSurfaceAppearance } from 'cesium'; export default EllipsoidSurfaceAppearance; }
-declare module "cesium/Source/Scene/Expression" { import { Expression } from 'cesium'; export default Expression; }
-declare module "cesium/Source/Scene/Fog" { import { Fog } from 'cesium'; export default Fog; }
-declare module "cesium/Source/Scene/FrameRateMonitor" { import { FrameRateMonitor } from 'cesium'; export default FrameRateMonitor; }
-declare module "cesium/Source/Scene/GetFeatureInfoFormat" { import { GetFeatureInfoFormat } from 'cesium'; export default GetFeatureInfoFormat; }
-declare module "cesium/Source/Scene/Globe" { import { Globe } from 'cesium'; export default Globe; }
-declare module "cesium/Source/Scene/GlobeTranslucency" { import { GlobeTranslucency } from 'cesium'; export default GlobeTranslucency; }
-declare module "cesium/Source/Scene/GoogleEarthEnterpriseImageryProvider" { import { GoogleEarthEnterpriseImageryProvider } from 'cesium'; export default GoogleEarthEnterpriseImageryProvider; }
-declare module "cesium/Source/Scene/GoogleEarthEnterpriseMapsProvider" { import { GoogleEarthEnterpriseMapsProvider } from 'cesium'; export default GoogleEarthEnterpriseMapsProvider; }
-declare module "cesium/Source/Scene/GridImageryProvider" { import { GridImageryProvider } from 'cesium'; export default GridImageryProvider; }
-declare module "cesium/Source/Scene/GroundPolylinePrimitive" { import { GroundPolylinePrimitive } from 'cesium'; export default GroundPolylinePrimitive; }
-declare module "cesium/Source/Scene/GroundPrimitive" { import { GroundPrimitive } from 'cesium'; export default GroundPrimitive; }
-declare module "cesium/Source/Scene/I3SDataProvider" { import { I3SDataProvider } from 'cesium'; export default I3SDataProvider; }
-declare module "cesium/Source/Scene/I3SFeature" { import { I3SFeature } from 'cesium'; export default I3SFeature; }
-declare module "cesium/Source/Scene/I3SField" { import { I3SField } from 'cesium'; export default I3SField; }
-declare module "cesium/Source/Scene/I3SGeometry" { import { I3SGeometry } from 'cesium'; export default I3SGeometry; }
-declare module "cesium/Source/Scene/I3SLayer" { import { I3SLayer } from 'cesium'; export default I3SLayer; }
-declare module "cesium/Source/Scene/I3SNode" { import { I3SNode } from 'cesium'; export default I3SNode; }
-declare module "cesium/Source/Scene/ImageBasedLighting" { import { ImageBasedLighting } from 'cesium'; export default ImageBasedLighting; }
-declare module "cesium/Source/Scene/ImageryLayer" { import { ImageryLayer } from 'cesium'; export default ImageryLayer; }
-declare module "cesium/Source/Scene/ImageryLayerCollection" { import { ImageryLayerCollection } from 'cesium'; export default ImageryLayerCollection; }
-declare module "cesium/Source/Scene/ImageryLayerFeatureInfo" { import { ImageryLayerFeatureInfo } from 'cesium'; export default ImageryLayerFeatureInfo; }
-declare module "cesium/Source/Scene/ImageryProvider" { import { ImageryProvider } from 'cesium'; export default ImageryProvider; }
-declare module "cesium/Source/Scene/IonImageryProvider" { import { IonImageryProvider } from 'cesium'; export default IonImageryProvider; }
-declare module "cesium/Source/Scene/Label" { import { Label } from 'cesium'; export default Label; }
-declare module "cesium/Source/Scene/LabelCollection" { import { LabelCollection } from 'cesium'; export default LabelCollection; }
-declare module "cesium/Source/Scene/Light" { import { Light } from 'cesium'; export default Light; }
-declare module "cesium/Source/Scene/MapboxImageryProvider" { import { MapboxImageryProvider } from 'cesium'; export default MapboxImageryProvider; }
-declare module "cesium/Source/Scene/MapboxStyleImageryProvider" { import { MapboxStyleImageryProvider } from 'cesium'; export default MapboxStyleImageryProvider; }
-declare module "cesium/Source/Scene/Material" { import { Material } from 'cesium'; export default Material; }
-declare module "cesium/Source/Scene/MaterialAppearance" { import { MaterialAppearance } from 'cesium'; export default MaterialAppearance; }
-declare module "cesium/Source/Scene/Moon" { import { Moon } from 'cesium'; export default Moon; }
-declare module "cesium/Source/Scene/NeverTileDiscardPolicy" { import { NeverTileDiscardPolicy } from 'cesium'; export default NeverTileDiscardPolicy; }
-declare module "cesium/Source/Scene/OpenStreetMapImageryProvider" { import { OpenStreetMapImageryProvider } from 'cesium'; export default OpenStreetMapImageryProvider; }
-declare module "cesium/Source/Scene/Particle" { import { Particle } from 'cesium'; export default Particle; }
-declare module "cesium/Source/Scene/ParticleBurst" { import { ParticleBurst } from 'cesium'; export default ParticleBurst; }
-declare module "cesium/Source/Scene/ParticleEmitter" { import { ParticleEmitter } from 'cesium'; export default ParticleEmitter; }
-declare module "cesium/Source/Scene/ParticleSystem" { import { ParticleSystem } from 'cesium'; export default ParticleSystem; }
-declare module "cesium/Source/Scene/PerInstanceColorAppearance" { import { PerInstanceColorAppearance } from 'cesium'; export default PerInstanceColorAppearance; }
-declare module "cesium/Source/Scene/PointCloudShading" { import { PointCloudShading } from 'cesium'; export default PointCloudShading; }
-declare module "cesium/Source/Scene/PointPrimitive" { import { PointPrimitive } from 'cesium'; export default PointPrimitive; }
-declare module "cesium/Source/Scene/PointPrimitiveCollection" { import { PointPrimitiveCollection } from 'cesium'; export default PointPrimitiveCollection; }
-declare module "cesium/Source/Scene/Polyline" { import { Polyline } from 'cesium'; export default Polyline; }
-declare module "cesium/Source/Scene/PolylineCollection" { import { PolylineCollection } from 'cesium'; export default PolylineCollection; }
-declare module "cesium/Source/Scene/PolylineColorAppearance" { import { PolylineColorAppearance } from 'cesium'; export default PolylineColorAppearance; }
-declare module "cesium/Source/Scene/PolylineMaterialAppearance" { import { PolylineMaterialAppearance } from 'cesium'; export default PolylineMaterialAppearance; }
-declare module "cesium/Source/Scene/PostProcessStage" { import { PostProcessStage } from 'cesium'; export default PostProcessStage; }
-declare module "cesium/Source/Scene/PostProcessStageCollection" { import { PostProcessStageCollection } from 'cesium'; export default PostProcessStageCollection; }
-declare module "cesium/Source/Scene/PostProcessStageComposite" { import { PostProcessStageComposite } from 'cesium'; export default PostProcessStageComposite; }
-declare module "cesium/Source/Scene/PostProcessStageLibrary" { import { PostProcessStageLibrary } from 'cesium'; export default PostProcessStageLibrary; }
-declare module "cesium/Source/Scene/Primitive" { import { Primitive } from 'cesium'; export default Primitive; }
-declare module "cesium/Source/Scene/PrimitiveCollection" { import { PrimitiveCollection } from 'cesium'; export default PrimitiveCollection; }
-declare module "cesium/Source/Scene/Scene" { import { Scene } from 'cesium'; export default Scene; }
-declare module "cesium/Source/Scene/SceneTransforms" { import { SceneTransforms } from 'cesium'; export default SceneTransforms; }
-declare module "cesium/Source/Scene/ScreenSpaceCameraController" { import { ScreenSpaceCameraController } from 'cesium'; export default ScreenSpaceCameraController; }
-declare module "cesium/Source/Scene/ShadowMap" { import { ShadowMap } from 'cesium'; export default ShadowMap; }
-declare module "cesium/Source/Scene/SingleTileImageryProvider" { import { SingleTileImageryProvider } from 'cesium'; export default SingleTileImageryProvider; }
-declare module "cesium/Source/Scene/SkyAtmosphere" { import { SkyAtmosphere } from 'cesium'; export default SkyAtmosphere; }
-declare module "cesium/Source/Scene/SkyBox" { import { SkyBox } from 'cesium'; export default SkyBox; }
-declare module "cesium/Source/Scene/SphereEmitter" { import { SphereEmitter } from 'cesium'; export default SphereEmitter; }
-declare module "cesium/Source/Scene/StyleExpression" { import { StyleExpression } from 'cesium'; export default StyleExpression; }
-declare module "cesium/Source/Scene/Sun" { import { Sun } from 'cesium'; export default Sun; }
-declare module "cesium/Source/Scene/SunLight" { import { SunLight } from 'cesium'; export default SunLight; }
-declare module "cesium/Source/Scene/TileCoordinatesImageryProvider" { import { TileCoordinatesImageryProvider } from 'cesium'; export default TileCoordinatesImageryProvider; }
-declare module "cesium/Source/Scene/TileDiscardPolicy" { import { TileDiscardPolicy } from 'cesium'; export default TileDiscardPolicy; }
-declare module "cesium/Source/Scene/TileMapServiceImageryProvider" { import { TileMapServiceImageryProvider } from 'cesium'; export default TileMapServiceImageryProvider; }
-declare module "cesium/Source/Scene/TimeDynamicImagery" { import { TimeDynamicImagery } from 'cesium'; export default TimeDynamicImagery; }
-declare module "cesium/Source/Scene/TimeDynamicPointCloud" { import { TimeDynamicPointCloud } from 'cesium'; export default TimeDynamicPointCloud; }
-declare module "cesium/Source/Scene/UrlTemplateImageryProvider" { import { UrlTemplateImageryProvider } from 'cesium'; export default UrlTemplateImageryProvider; }
-declare module "cesium/Source/Scene/ViewportQuad" { import { ViewportQuad } from 'cesium'; export default ViewportQuad; }
-declare module "cesium/Source/Scene/WebMapServiceImageryProvider" { import { WebMapServiceImageryProvider } from 'cesium'; export default WebMapServiceImageryProvider; }
-declare module "cesium/Source/Scene/WebMapTileServiceImageryProvider" { import { WebMapTileServiceImageryProvider } from 'cesium'; export default WebMapTileServiceImageryProvider; }
-declare module "cesium/Source/Scene/createElevationBandMaterial" { import { createElevationBandMaterial } from 'cesium'; export default createElevationBandMaterial; }
-declare module "cesium/Source/Scene/createOsmBuildings" { import { createOsmBuildings } from 'cesium'; export default createOsmBuildings; }
-declare module "cesium/Source/Scene/createTangentSpaceDebugPrimitive" { import { createTangentSpaceDebugPrimitive } from 'cesium'; export default createTangentSpaceDebugPrimitive; }
-declare module "cesium/Source/Scene/createWorldImagery" { import { createWorldImagery } from 'cesium'; export default createWorldImagery; }
-declare module "cesium/Source/Widgets/ClockViewModel" { import { ClockViewModel } from 'cesium'; export default ClockViewModel; }
-declare module "cesium/Source/Widgets/Command" { import { Command } from 'cesium'; export default Command; }
-declare module "cesium/Source/Widgets/SvgPathBindingHandler" { import { SvgPathBindingHandler } from 'cesium'; export default SvgPathBindingHandler; }
-declare module "cesium/Source/Widgets/ToggleButtonViewModel" { import { ToggleButtonViewModel } from 'cesium'; export default ToggleButtonViewModel; }
-declare module "cesium/Source/Widgets/createCommand" { import { createCommand } from 'cesium'; export default createCommand; }
-declare module "cesium/Source/Scene/GltfPipeline/removeExtension" { import { removeExtension } from 'cesium'; export default removeExtension; }
-declare module "cesium/Source/Scene/Model/CustomShader" { import { CustomShader } from 'cesium'; export default CustomShader; }
-declare module "cesium/Source/Scene/Model/Model" { import { Model } from 'cesium'; export default Model; }
-declare module "cesium/Source/Scene/Model/ModelAnimation" { import { ModelAnimation } from 'cesium'; export default ModelAnimation; }
-declare module "cesium/Source/Scene/Model/ModelAnimationCollection" { import { ModelAnimationCollection } from 'cesium'; export default ModelAnimationCollection; }
-declare module "cesium/Source/Scene/Model/ModelFeature" { import { ModelFeature } from 'cesium'; export default ModelFeature; }
-declare module "cesium/Source/Scene/Model/ModelNode" { import { ModelNode } from 'cesium'; export default ModelNode; }
-declare module "cesium/Source/Scene/Model/TextureUniform" { import { TextureUniform } from 'cesium'; export default TextureUniform; }
-declare module "cesium/Source/Widgets/Animation/Animation" { import { Animation } from 'cesium'; export default Animation; }
-declare module "cesium/Source/Widgets/Animation/AnimationViewModel" { import { AnimationViewModel } from 'cesium'; export default AnimationViewModel; }
-declare module "cesium/Source/Widgets/BaseLayerPicker/BaseLayerPicker" { import { BaseLayerPicker } from 'cesium'; export default BaseLayerPicker; }
-declare module "cesium/Source/Widgets/BaseLayerPicker/BaseLayerPickerViewModel" { import { BaseLayerPickerViewModel } from 'cesium'; export default BaseLayerPickerViewModel; }
-declare module "cesium/Source/Widgets/BaseLayerPicker/ProviderViewModel" { import { ProviderViewModel } from 'cesium'; export default ProviderViewModel; }
-declare module "cesium/Source/Widgets/Cesium3DTilesInspector/Cesium3DTilesInspector" { import { Cesium3DTilesInspector } from 'cesium'; export default Cesium3DTilesInspector; }
-declare module "cesium/Source/Widgets/Cesium3DTilesInspector/Cesium3DTilesInspectorViewModel" { import { Cesium3DTilesInspectorViewModel } from 'cesium'; export default Cesium3DTilesInspectorViewModel; }
-declare module "cesium/Source/Widgets/CesiumInspector/CesiumInspector" { import { CesiumInspector } from 'cesium'; export default CesiumInspector; }
-declare module "cesium/Source/Widgets/CesiumInspector/CesiumInspectorViewModel" { import { CesiumInspectorViewModel } from 'cesium'; export default CesiumInspectorViewModel; }
-declare module "cesium/Source/Widgets/CesiumWidget/CesiumWidget" { import { CesiumWidget } from 'cesium'; export default CesiumWidget; }
-declare module "cesium/Source/Widgets/FullscreenButton/FullscreenButton" { import { FullscreenButton } from 'cesium'; export default FullscreenButton; }
-declare module "cesium/Source/Widgets/FullscreenButton/FullscreenButtonViewModel" { import { FullscreenButtonViewModel } from 'cesium'; export default FullscreenButtonViewModel; }
-declare module "cesium/Source/Widgets/Geocoder/Geocoder" { import { Geocoder } from 'cesium'; export default Geocoder; }
-declare module "cesium/Source/Widgets/Geocoder/GeocoderViewModel" { import { GeocoderViewModel } from 'cesium'; export default GeocoderViewModel; }
-declare module "cesium/Source/Widgets/HomeButton/HomeButton" { import { HomeButton } from 'cesium'; export default HomeButton; }
-declare module "cesium/Source/Widgets/HomeButton/HomeButtonViewModel" { import { HomeButtonViewModel } from 'cesium'; export default HomeButtonViewModel; }
-declare module "cesium/Source/Widgets/InfoBox/InfoBox" { import { InfoBox } from 'cesium'; export default InfoBox; }
-declare module "cesium/Source/Widgets/InfoBox/InfoBoxViewModel" { import { InfoBoxViewModel } from 'cesium'; export default InfoBoxViewModel; }
-declare module "cesium/Source/Widgets/NavigationHelpButton/NavigationHelpButton" { import { NavigationHelpButton } from 'cesium'; export default NavigationHelpButton; }
-declare module "cesium/Source/Widgets/NavigationHelpButton/NavigationHelpButtonViewModel" { import { NavigationHelpButtonViewModel } from 'cesium'; export default NavigationHelpButtonViewModel; }
-declare module "cesium/Source/Widgets/PerformanceWatchdog/PerformanceWatchdog" { import { PerformanceWatchdog } from 'cesium'; export default PerformanceWatchdog; }
-declare module "cesium/Source/Widgets/PerformanceWatchdog/PerformanceWatchdogViewModel" { import { PerformanceWatchdogViewModel } from 'cesium'; export default PerformanceWatchdogViewModel; }
-declare module "cesium/Source/Widgets/ProjectionPicker/ProjectionPicker" { import { ProjectionPicker } from 'cesium'; export default ProjectionPicker; }
-declare module "cesium/Source/Widgets/ProjectionPicker/ProjectionPickerViewModel" { import { ProjectionPickerViewModel } from 'cesium'; export default ProjectionPickerViewModel; }
-declare module "cesium/Source/Widgets/SceneModePicker/SceneModePicker" { import { SceneModePicker } from 'cesium'; export default SceneModePicker; }
-declare module "cesium/Source/Widgets/SceneModePicker/SceneModePickerViewModel" { import { SceneModePickerViewModel } from 'cesium'; export default SceneModePickerViewModel; }
-declare module "cesium/Source/Widgets/SelectionIndicator/SelectionIndicator" { import { SelectionIndicator } from 'cesium'; export default SelectionIndicator; }
-declare module "cesium/Source/Widgets/SelectionIndicator/SelectionIndicatorViewModel" { import { SelectionIndicatorViewModel } from 'cesium'; export default SelectionIndicatorViewModel; }
-declare module "cesium/Source/Widgets/Timeline/Timeline" { import { Timeline } from 'cesium'; export default Timeline; }
-declare module "cesium/Source/Widgets/VRButton/VRButton" { import { VRButton } from 'cesium'; export default VRButton; }
-declare module "cesium/Source/Widgets/VRButton/VRButtonViewModel" { import { VRButtonViewModel } from 'cesium'; export default VRButtonViewModel; }
-declare module "cesium/Source/Widgets/Viewer/Viewer" { import { Viewer } from 'cesium'; export default Viewer; }
-declare module "cesium/Source/Widgets/Viewer/viewerCesium3DTilesInspectorMixin" { import { viewerCesium3DTilesInspectorMixin } from 'cesium'; export default viewerCesium3DTilesInspectorMixin; }
-declare module "cesium/Source/Widgets/Viewer/viewerCesiumInspectorMixin" { import { viewerCesiumInspectorMixin } from 'cesium'; export default viewerCesiumInspectorMixin; }
-declare module "cesium/Source/Widgets/Viewer/viewerDragDropMixin" { import { viewerDragDropMixin } from 'cesium'; export default viewerDragDropMixin; }
-declare module "cesium/Source/Widgets/Viewer/viewerPerformanceWatchdogMixin" { import { viewerPerformanceWatchdogMixin } from 'cesium'; export default viewerPerformanceWatchdogMixin; }
