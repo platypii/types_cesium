@@ -6362,6 +6362,12 @@ export namespace FeatureDetection {
      * @returns true if the browsers supports Web Assembly, false if not.
      */
     function supportsWebAssembly(): boolean;
+    /**
+     * Detects whether the current browser supports a WebGL2 rendering context for the specified scene.
+     * @param scene - the Cesium scene specifying the rendering context
+     * @returns true if the browser supports a WebGL2 rendering context, false if not.
+     */
+    function supportsWebgl2(scene: Scene): boolean;
 }
 
 /**
@@ -12351,6 +12357,14 @@ export enum PixelFormat {
      * A pixel format containing an alpha channel.
      */
     ALPHA = WebGLConstants.ALPHA,
+    /**
+     * A pixel format containing a red channel
+     */
+    RED = WebGLConstants.RED,
+    /**
+     * A pixel format containing red and green channels.
+     */
+    RG = WebGLConstants.RG,
     /**
      * A pixel format containing red, green, and blue channels.
      */
@@ -24983,13 +24997,13 @@ export type exportKmlModelCallback = (model: ModelGraphics, time: JulianDate, ex
  * Setting this to false will improve performance, but hurt visual quality,
  * especially for horizon views.
  * </p>
- * @property [requestWebgl1 = true] - If true and the browser supports it, use a WebGL 1 rendering context
+ * @property [requestWebGl1 = false] - If true and the browser supports it, use a WebGL 1 rendering context
  * @property [allowTextureFilterAnisotropic = true] - If true, use anisotropic filtering during texture sampling
  * @property [webgl] - WebGL options to be passed on to canvas.getContext
  * @property [getWebGLStub] - A function to create a WebGL stub for testing
  */
 export type ContextOptions = {
-    requestWebgl1?: boolean;
+    requestWebGl1?: boolean;
     allowTextureFilterAnisotropic?: boolean;
     webgl?: WebGLOptions;
     getWebGLStub?: (...params: any[]) => any;
@@ -35552,7 +35566,7 @@ export type UniformSpecifier = {
  *   `,
  *   fragmentShaderText: `
  *   void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
- *     material.normal = texture2D(u_normalMap, fsInput.attributes.texCoord_0);
+ *     material.normal = texture(u_normalMap, fsInput.attributes.texCoord_0);
  *     material.diffuse = v_selectedColor;
  *   }
  *   `
@@ -35671,7 +35685,7 @@ export enum LightingModel {
     /**
      * Use unlit shading, i.e. skip lighting calculations. The model's
      * diffuse color (assumed to be linear RGB, not sRGB) is used directly
-     * when computing <code>gl_FragColor</code>. The alpha mode is still
+     * when computing <code>out_FragColor</code>. The alpha mode is still
      * applied.
      */
     UNLIT = 0,
@@ -38092,12 +38106,12 @@ export class PolylineMaterialAppearance {
  * // Simple stage to change the color
  * const fs =`
  *     uniform sampler2D colorTexture;
- *     varying vec2 v_textureCoordinates;
+ *     in vec2 v_textureCoordinates;
  *     uniform float scale;
  *     uniform vec3 offset;
  *     void main() {
- *         vec4 color = texture2D(colorTexture, v_textureCoordinates);
- *         gl_FragColor = vec4(color.rgb * scale + offset, 1.0);
+ *         vec4 color = texture(colorTexture, v_textureCoordinates);
+ *         out_FragColor = vec4(color.rgb * scale + offset, 1.0);
  *     }`;
  * scene.postProcessStages.add(new Cesium.PostProcessStage({
  *     fragmentShader : fs,
@@ -38113,15 +38127,15 @@ export class PolylineMaterialAppearance {
  * // If czm_selected returns true, the current fragment belongs to geometry in the selected array.
  * const fs =`
  *     uniform sampler2D colorTexture;
- *     varying vec2 v_textureCoordinates;
+ *     in vec2 v_textureCoordinates;
  *     uniform vec4 highlight;
  *     void main() {
- *         vec4 color = texture2D(colorTexture, v_textureCoordinates);
+ *         vec4 color = texture(colorTexture, v_textureCoordinates);
  *         if (czm_selected()) {
  *             vec3 highlighted = highlight.a * highlight.rgb + (1.0 - highlight.a) * color.rgb;
- *             gl_FragColor = vec4(highlighted, 1.0);
+ *             out_FragColor = vec4(highlighted, 1.0);
  *         } else {
- *             gl_FragColor = color;
+ *             out_FragColor = color;
  *         }
  *     }`;
  * const stage = scene.postProcessStages.add(new Cesium.PostProcessStage({
@@ -38236,7 +38250,7 @@ export class PostProcessStage {
      * if (czm_selected(v_textureCoordinates)) {
      *     // apply post-process stage
      * } else {
-     *     gl_FragColor = texture2D(colorTexture, v_textureCoordinates);
+     *     out_FragColor = texture(colorTexture, v_textureCoordinates);
      * }
      * </code>
      * </p>
