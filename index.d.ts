@@ -17945,12 +17945,6 @@ export type binarySearchComparator = (a: any, b: any) => number;
 export function buildModuleUrl(relativeUrl: string): string;
 
 /**
- * A browser-independent function to cancel an animation frame requested using {@link requestAnimationFrame}.
- * @param requestID - The value returned by {@link requestAnimationFrame}.
- */
-export function cancelAnimationFrame(requestID: number): void;
-
-/**
  * Clones an object, returning a new object containing the same properties.
  * @param object - The object to clone.
  * @param [deep = false] - If true, all properties will be deep cloned recursively.
@@ -18217,28 +18211,6 @@ export function pointInsideTriangle(point: Cartesian2 | Cartesian3, p0: Cartesia
  * @returns An object containing the parameters parsed from the query string.
  */
 export function queryToObject(queryString: string): any;
-
-/**
- * A browser-independent function to request a new animation frame.  This is used to create
- * an application's draw loop as shown in the example below.
- * @example
- * // Create a draw loop using requestAnimationFrame. The
- * // tick callback function is called for every animation frame.
- * function tick() {
- *   scene.render();
- *   Cesium.requestAnimationFrame(tick);
- * }
- * tick();
- * @param callback - The function to call when the next frame should be drawn.
- * @returns An ID that can be passed to {@link cancelAnimationFrame} to cancel the request.
- */
-export function requestAnimationFrame(callback: requestAnimationFrameCallback): number;
-
-/**
- * A function that will be called when the next frame should be drawn.
- * @param timestamp - A timestamp for the frame, in milliseconds.
- */
-export type requestAnimationFrameCallback = (timestamp: number) => void;
 
 /**
  * Initiates a terrain height query for an array of {@link Cartographic} positions by
@@ -24084,7 +24056,7 @@ export class ReferenceProperty {
     /**
      * Gets the array of property names used to retrieve the referenced property.
      */
-    readonly targetPropertyNames: string[];
+    readonly targetPropertyNames: any;
     /**
      * Gets the resolved instance of the underlying referenced property.
      */
@@ -24997,13 +24969,13 @@ export type exportKmlModelCallback = (model: ModelGraphics, time: JulianDate, ex
  * Setting this to false will improve performance, but hurt visual quality,
  * especially for horizon views.
  * </p>
- * @property [requestWebGl1 = false] - If true and the browser supports it, use a WebGL 1 rendering context
+ * @property [requestWebgl1 = false] - If true and the browser supports it, use a WebGL 1 rendering context
  * @property [allowTextureFilterAnisotropic = true] - If true, use anisotropic filtering during texture sampling
  * @property [webgl] - WebGL options to be passed on to canvas.getContext
  * @property [getWebGLStub] - A function to create a WebGL stub for testing
  */
 export type ContextOptions = {
-    requestWebGl1?: boolean;
+    requestWebgl1?: boolean;
     allowTextureFilterAnisotropic?: boolean;
     webgl?: WebGLOptions;
     getWebGLStub?: (...params: any[]) => any;
@@ -34726,12 +34698,12 @@ export class MapboxStyleImageryProvider {
  *
  * // Create a color material with full Fabric notation:
  * polygon.material = new Cesium.Material({
- *     fabric : {
- *         type : 'Color',
- *         uniforms : {
- *             color : new Cesium.Color(1.0, 1.0, 0.0, 1.0)
- *         }
+ *   fabric: {
+ *     type: 'Color',
+ *     uniforms: {
+ *       color: new Cesium.Color(1.0, 1.0, 0.0, 1.0)
  *     }
+ *   }
  * });
  * @param [options] - Object with the following properties:
  * @param [options.strict = false] - Throws errors for issues that would normally be ignored, including unused uniforms or materials.
@@ -34740,6 +34712,7 @@ export class MapboxStyleImageryProvider {
  * @param [options.minificationFilter = TextureMinificationFilter.LINEAR] - The {@link TextureMinificationFilter} to apply to this material's textures.
  * @param [options.magnificationFilter = TextureMagnificationFilter.LINEAR] - The {@link TextureMagnificationFilter} to apply to this material's textures.
  * @param options.fabric - The fabric JSON used to generate the material.
+ * ructor
  */
 export class Material {
     constructor(options?: {
@@ -34776,7 +34749,7 @@ export class Material {
      * Shorthand for: new Material({fabric : {type : type}});
      * @example
      * const material = Cesium.Material.fromType('Color', {
-     *     color : new Cesium.Color(1.0, 0.0, 0.0, 1.0)
+     *   color: new Cesium.Color(1.0, 0.0, 0.0, 1.0)
      * });
      * @param type - The base material type.
      * @param [uniforms] - Overrides for the default uniforms.
@@ -39970,6 +39943,10 @@ export class ScreenSpaceCameraController {
      * The minimum height the camera must be before picking the terrain instead of the ellipsoid.
      */
     minimumPickingTerrainHeight: number;
+    /**
+     * The minimum distance the camera must be before testing for collision with terrain when zoom with inertia.
+     */
+    minimumPickingTerrainDistanceWithInertia: number;
     /**
      * The minimum height the camera must be before testing for collision with terrain.
      */
